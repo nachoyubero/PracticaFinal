@@ -8,5 +8,5 @@ public record Pista(
         String ubicacion,
         double precioHora,
         boolean activa,
-        LocalDate fechaAlta
+        LocalDate fechaAlta //Aqui solo se sabe año-mes-día
 ) {}
