@@ -1,6 +1,12 @@
 package edu.comillas.icai.gitt.pat.spring.padelapp.modelo;
 
-public record Pista() {
+import java.time.LocalDate;
 
-
-}
+public record Pista(
+        int idPista,
+        String nombre,
+        String ubicacion,
+        double precioHora,
+        boolean activa,
+        LocalDate fechaAlta
+) {}
