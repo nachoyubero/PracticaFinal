@@ -1,6 +1,5 @@
 package edu.comillas.icai.gitt.pat.spring.padelapp.controlador;
 
-
 import edu.comillas.icai.gitt.pat.spring.padelapp.clases.NombreRol;
 import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Pista;
 import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Rol;
@@ -14,13 +13,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//Aqui se van a realizar los siguientes endpoints:
-//
+//Aqui se van a realizar los endpoints
 @RestController
 @RequestMapping("/pistaPadel") //Comenzamos a definir nuestra base de URL
 public class PistaController {
     HashMap<Integer, Usuario> usuarios = new HashMap<>(); //Simulamos una base de datos de usuarios
-
+    HashMap<Integer, Pista> pistas = new HashMap<>();
     // Como no tenemos base de datos, vamos a simular una lista de usuarios con un HashMap.
     public PistaController() {
         Rol rolDeAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
@@ -35,6 +33,7 @@ public class PistaController {
     public ResponseEntity<Pista> crearPista(@RequestBody Pista pista){
         //Aqui se va a crear la pista, pero como no tenemos la capa de servicio ni la de repositorio, vamos a simularlo
         Pista nuevaPista = new Pista(1, pista.nombre(), pista.ubicacion(), pista.precioHora(), true, pista.fechaAlta());
+        pistas.put(1, nuevaPista); //Guardamos la pista en el HashMap de pistas porque todavía no tenemos persistencia
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaPista);
     }
 
@@ -47,4 +46,6 @@ public class PistaController {
         } else { return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
+
+    //
 }
