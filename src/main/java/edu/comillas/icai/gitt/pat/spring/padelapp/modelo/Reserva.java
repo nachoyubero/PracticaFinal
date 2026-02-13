@@ -14,5 +14,9 @@ public record Reserva(
         LocalTime horaInicio,
         LocalDate fechaCreacion,
         Integer duracionMinutos
-        // Falta hora fin que hay que calcular
-) {}
+) {
+    //Se calcula la hora de fin sumando la duración a la hora de inicio
+    public LocalTime getHoraFin() {
+        return horaInicio.plusMinutes(duracionMinutos);
+    }
+}
