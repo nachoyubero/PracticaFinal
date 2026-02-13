@@ -50,7 +50,11 @@ public class PistaController {
 
     // Aquí se realiza el endpoint GET para obtener usuario por idUsuario
     @GetMapping("/users/{idUsuario}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario, @RequestBody(required = false) Usuario usuarioSolicitante) {
+    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario, @RequestBody(required = true) Usuario usuarioSolicitante) {
+            //Comprobamos que no sea nulo
+        if (usuarioSolicitante.rol() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes enviar el rol del solicitante.");}
+
             if (usuarioSolicitante.rol().nombreRol() == NombreRol.ADMIN) {
                 if (usuarios.containsKey(idUsuario)) {
                     Usuario usuarioBuscado = usuarios.get(idUsuario);
@@ -63,35 +67,49 @@ public class PistaController {
 
     //Vamos a hacer el endpoint del PATCHpara actualizar datos del usuario, solo permitido para admins
     @PatchMapping("/users/{idUsuario}")
-    public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos, @RequestBody(required = false) Usuario usuarioSolicitante) {
-        //Comprobamos que el usuario solicitante es admin
-        if(usuarioSolicitante.rol().nombreRol() != NombreRol.ADMIN) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<Usuario> modificarUsuario(
+            @PathVariable int idUsuario,
+            @RequestBody Usuario datosNuevos,
+            @RequestHeader("idSolicitante") int idSolicitante //No es lo ideal, vamos a simular que el id del usuario que hace la petición viene en el header
+    ) {
+        if (!usuarios.containsKey(idSolicitante)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        // Primero validamos que el usuario exista
-        if (!usuarios.containsKey(idUsuario)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");
+        Usuario adminQueSolicita = usuarios.get(idSolicitante);
+
+        if (adminQueSolicita.rol().nombreRol() != NombreRol.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (!usuarios.containsKey(idUsuario)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");
+        }
 
         Usuario usuarioAntiguo = usuarios.get(idUsuario);
 
-        // Validación de Email Único
         if (datosNuevos.email() != null && !datosNuevos.email().equals(usuarioAntiguo.email())) {
-            // Recorremos todos los usuarios para ver si alguien ya tiene ese email
             boolean emailOcupado = usuarios.values().stream().anyMatch(u -> u.email().equals(datosNuevos.email()));
             if (emailOcupado) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso por otro usuario.");}}
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso por otro usuario.");
+            }
+        }
 
         if (datosNuevos.email() != null && !datosNuevos.email().contains("@")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El formato del email no es válido (falta @).");}
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El formato del email no es válido (falta @).");
+        }
 
         Usuario usuarioActualizado = new Usuario(
                 idUsuario,
                 datosNuevos.nombre() != null ? datosNuevos.nombre() : usuarioAntiguo.nombre(),
                 datosNuevos.apellidos() != null ? datosNuevos.apellidos() : usuarioAntiguo.apellidos(),
                 datosNuevos.activo() ? datosNuevos.activo() : usuarioAntiguo.activo(),
-                usuarioAntiguo.fechaAlta(), // La fecha de alta nunca cambia
+                usuarioAntiguo.fechaAlta(),
                 datosNuevos.telefono() != null ? datosNuevos.telefono() : usuarioAntiguo.telefono(),
                 datosNuevos.rol() != null ? datosNuevos.rol() : usuarioAntiguo.rol(),
                 datosNuevos.email() != null ? datosNuevos.email() : usuarioAntiguo.email()
         );
+
         usuarios.put(idUsuario, usuarioActualizado);
         return ResponseEntity.ok(usuarioActualizado);
     }
