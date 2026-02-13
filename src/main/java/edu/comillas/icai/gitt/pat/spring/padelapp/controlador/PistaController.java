@@ -47,5 +47,21 @@ public class PistaController {
         }
     }
 
-    //
+    // Aquí se realiza el endpoint GET para obtener usuario por idUsuario
+    @GetMapping("/users/{idUsuario}")
+    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario, @RequestBody(required = false) Usuario usuarioSolicitante) {
+            if (usuarioSolicitante.rol().nombreRol() == NombreRol.ADMIN) {
+                if (usuarios.containsKey(idUsuario)) {
+                    Usuario usuarioBuscado = usuarios.get(idUsuario);
+                    return ResponseEntity.status(HttpStatus.OK).body(usuarioBuscado);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                }
+            } else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
+
+
+
 }
