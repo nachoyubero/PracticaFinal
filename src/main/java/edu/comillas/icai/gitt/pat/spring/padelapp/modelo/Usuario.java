@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 public record Usuario(
         Integer idUsuario,
         String nombre,
+        String password,
         String apellidos,
         Boolean activo,
         LocalDateTime fechaAlta, //Utilizamos localdatetime para saber dia-hora-mins-seg

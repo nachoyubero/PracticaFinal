@@ -27,8 +27,8 @@ public class PistaController {
         Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
         //Declaramos los roles y usuarios de prueba
-        usuarios.put(1, new Usuario(1, "Pepe", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
-        usuarios.put(2, new Usuario(2, "Laura", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
+        usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
+        usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
     }
     //Endpoint para crear una nueva pista
     @PostMapping("/courts")
@@ -73,6 +73,7 @@ public class PistaController {
         Usuario usuarioActualizado = new Usuario(
                 idUsuario,
                 datosNuevos.nombre() != null ? datosNuevos.nombre() : usuarioAntiguo.nombre(),
+                datosNuevos.password() != null ? datosNuevos.password() : usuarioAntiguo.password(),
                 datosNuevos.apellidos() != null ? datosNuevos.apellidos() : usuarioAntiguo.apellidos(),
                 datosNuevos.activo() != null ? datosNuevos.activo() : usuarioAntiguo.activo(),
                 usuarioAntiguo.fechaAlta(),
