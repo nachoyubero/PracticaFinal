@@ -74,7 +74,7 @@ public class PistaController {
                 idUsuario,
                 datosNuevos.nombre() != null ? datosNuevos.nombre() : usuarioAntiguo.nombre(),
                 datosNuevos.apellidos() != null ? datosNuevos.apellidos() : usuarioAntiguo.apellidos(),
-                datosNuevos.activo() ? datosNuevos.activo() : usuarioAntiguo.activo(),
+                datosNuevos.activo() != null ? datosNuevos.activo() : usuarioAntiguo.activo(),
                 usuarioAntiguo.fechaAlta(),
                 datosNuevos.telefono() != null ? datosNuevos.telefono() : usuarioAntiguo.telefono(),
                 datosNuevos.rol() != null ? datosNuevos.rol() : usuarioAntiguo.rol(),
