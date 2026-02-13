@@ -7,6 +7,7 @@ import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,6 +60,45 @@ public class PistaController {
                 }
             } else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+    //Vamos a hacer el endpoint del PATCHpara actualizar datos del usuario, solo permitido para admins
+    @PatchMapping("/users/{idUsuario}")
+    public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos, @RequestBody(required = false) Usuario usuarioSolicitante) {
+        //Comprobamos que el usuario solicitante es admin
+        if(usuarioSolicitante.rol().nombreRol() != NombreRol.ADMIN) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+        // Primero validamos que el usuario exista
+        if (!usuarios.containsKey(idUsuario)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");
+
+        Usuario usuarioAntiguo = usuarios.get(idUsuario);
+
+        // Validación de Email Único
+        if (datosNuevos.email() != null && !datosNuevos.email().equals(usuarioAntiguo.email())) {
+            // Recorremos todos los usuarios para ver si alguien ya tiene ese email
+            boolean emailOcupado = usuarios.values().stream().anyMatch(u -> u.email().equals(datosNuevos.email()));
+            if (emailOcupado) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso por otro usuario.");}}
+
+        if (datosNuevos.email() != null && !datosNuevos.email().contains("@")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El formato del email no es válido (falta @).");}
+
+        Usuario usuarioActualizado = new Usuario(
+                idUsuario,
+                datosNuevos.nombre() != null ? datosNuevos.nombre() : usuarioAntiguo.nombre(),
+                datosNuevos.apellidos() != null ? datosNuevos.apellidos() : usuarioAntiguo.apellidos(),
+                datosNuevos.activo() ? datosNuevos.activo() : usuarioAntiguo.activo(),
+                usuarioAntiguo.fechaAlta(), // La fecha de alta nunca cambia
+                datosNuevos.telefono() != null ? datosNuevos.telefono() : usuarioAntiguo.telefono(),
+                datosNuevos.rol() != null ? datosNuevos.rol() : usuarioAntiguo.rol(),
+                datosNuevos.email() != null ? datosNuevos.email() : usuarioAntiguo.email()
+        );
+        usuarios.put(idUsuario, usuarioActualizado);
+        return ResponseEntity.ok(usuarioActualizado);
+    }
+
+
+
+
 
 
 
