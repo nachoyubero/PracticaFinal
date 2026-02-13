@@ -13,75 +13,46 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-//Aqui se van a realizar los endpoints
+//Definimos el controlador REST para gestionar pistas y usuarios
 @RestController
-@RequestMapping("/pistaPadel") //Comenzamos a definir nuestra base de URL
+@RequestMapping("/pistaPadel")
 public class PistaController {
-    HashMap<Integer, Usuario> usuarios = new HashMap<>(); //Simulamos una base de datos de usuarios
-    HashMap<Integer, Pista> pistas = new HashMap<>();
-    // Como no tenemos base de datos, vamos a simular una lista de usuarios con un HashMap.
+    //Creamos hashmaps al no tener persistencia
+    private final Map<Integer, Usuario> usuarios = new HashMap<>();
+    private final Map<Integer, Pista> pistas = new HashMap<>();
+
     public PistaController() {
-        Rol rolDeAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
-        Rol rolDeUsuario = new Rol(2, NombreRol.USER, "Jugador normal");
-
-        usuarios.put(1, new Usuario(1, "Pepe", "García", true, LocalDateTime.now(), "600111222", rolDeAdmin, "admin@test.com"));
-        usuarios.put(2, new Usuario(2, "Laura", "López", true, LocalDateTime.now(), "600333444", rolDeUsuario, "laura@test.com"));
+        Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
+        Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
+        //Declaramos los roles y usuarios de prueba
+        usuarios.put(1, new Usuario(1, "Pepe", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
+        usuarios.put(2, new Usuario(2, "Laura", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
     }
-
-    // Creación del endpoint que crea una nueva pista de padel
+    //Endpoint para crear una nueva pista
     @PostMapping("/courts")
-    public ResponseEntity<Pista> crearPista(@RequestBody Pista pista){
-        //Aqui se va a crear la pista, pero como no tenemos la capa de servicio ni la de repositorio, vamos a simularlo
-        Pista nuevaPista = new Pista(1, pista.nombre(), pista.ubicacion(), pista.precioHora(), true, pista.fechaAlta());
-        pistas.put(1, nuevaPista); //Guardamos la pista en el HashMap de pistas porque todavía no tenemos persistencia
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaPista);
+    public ResponseEntity<Pista> crearPista(@RequestBody Pista pista) {
+        pistas.put(pista.idPista(), pista);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pista);
     }
-
-    //Endpoint que devuelve los usuarios si la peticción es de un admin
+    //Endpoint para obtener todos los usuarios
     @GetMapping("/users")
-    public ResponseEntity<List<Usuario>> obtenerUsuarios(@RequestBody Usuario usuarioSolicitante) {
-        if (usuarioSolicitante.rol().nombreRol() == NombreRol.ADMIN) {
-            List<Usuario> listaUsuarios = new ArrayList<>(usuarios.values());
-            return ResponseEntity.ok(listaUsuarios);
-        } else { return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<List<Usuario>> obtenerUsuarios() {
+        return ResponseEntity.ok(new ArrayList<>(usuarios.values()));
+    }
+    //Endpoint para obtener un usuario por su ID
+    @GetMapping("/users/{idUsuario}")
+    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario) {
+        if (usuarios.containsKey(idUsuario)) {
+            return ResponseEntity.ok(usuarios.get(idUsuario));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
-    // Aquí se realiza el endpoint GET para obtener usuario por idUsuario
-    @GetMapping("/users/{idUsuario}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario, @RequestBody(required = true) Usuario usuarioSolicitante) {
-            //Comprobamos que no sea nulo
-        if (usuarioSolicitante.rol() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes enviar el rol del solicitante.");}
-
-            if (usuarioSolicitante.rol().nombreRol() == NombreRol.ADMIN) {
-                if (usuarios.containsKey(idUsuario)) {
-                    Usuario usuarioBuscado = usuarios.get(idUsuario);
-                    return ResponseEntity.status(HttpStatus.OK).body(usuarioBuscado);
-                } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                }
-            } else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-    //Vamos a hacer el endpoint del PATCHpara actualizar datos del usuario, solo permitido para admins
+    //Endpoint para modificar parcialmente un usuario
     @PatchMapping("/users/{idUsuario}")
-    public ResponseEntity<Usuario> modificarUsuario(
-            @PathVariable int idUsuario,
-            @RequestBody Usuario datosNuevos,
-            @RequestHeader("idSolicitante") int idSolicitante //No es lo ideal, vamos a simular que el id del usuario que hace la petición viene en el header
-    ) {
-        if (!usuarios.containsKey(idSolicitante)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Usuario adminQueSolicita = usuarios.get(idSolicitante);
-
-        if (adminQueSolicita.rol().nombreRol() != NombreRol.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos) {
         if (!usuarios.containsKey(idUsuario)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");
         }
@@ -91,12 +62,12 @@ public class PistaController {
         if (datosNuevos.email() != null && !datosNuevos.email().equals(usuarioAntiguo.email())) {
             boolean emailOcupado = usuarios.values().stream().anyMatch(u -> u.email().equals(datosNuevos.email()));
             if (emailOcupado) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso por otro usuario.");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso.");
             }
         }
 
         if (datosNuevos.email() != null && !datosNuevos.email().contains("@")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El formato del email no es válido (falta @).");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El formato del email no es válido.");
         }
 
         Usuario usuarioActualizado = new Usuario(
@@ -113,13 +84,4 @@ public class PistaController {
         usuarios.put(idUsuario, usuarioActualizado);
         return ResponseEntity.ok(usuarioActualizado);
     }
-
-
-
-
-
-
-
-
-
 }
