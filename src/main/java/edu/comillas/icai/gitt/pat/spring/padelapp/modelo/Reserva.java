@@ -6,13 +6,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record Reserva(
-        int idReserva,
-        int idUsuario,
-        int idPista,
+        Integer idReserva,
+        Integer idUsuario,
+        Integer idPista,
         Estado estado,
         LocalDate fechaReserva,
         LocalTime horaInicio,
         LocalDate fechaCreacion,
-        int duracionMinutos
+        Integer duracionMinutos
         // Falta hora fin que hay que calcular
 ) {}

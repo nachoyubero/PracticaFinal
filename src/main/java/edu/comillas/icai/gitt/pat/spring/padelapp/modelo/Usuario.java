@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record Usuario(
-        int idUsuario,
+        Integer idUsuario,
         String nombre,
         String apellidos,
-        boolean activo,
+        Boolean activo,
         LocalDateTime fechaAlta, //Utilizamos localdatetime para saber dia-hora-mins-seg
         String telefono,
         Rol rol,
