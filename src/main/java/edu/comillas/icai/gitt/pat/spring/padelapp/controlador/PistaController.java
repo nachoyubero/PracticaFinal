@@ -35,18 +35,25 @@ public class PistaController {
         //Declaramos los roles y usuarios de prueba
         usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
         usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
+        //Añadimos unas pistas para poder hacer pruebas después
+        pistas.put(1, new Pista(1, "Pista Cristal 1", "Lateral Izquierdo", 20.0, true, LocalDate.now()));
+        pistas.put(2, new Pista(2, "Pista Muro 2", "Zona Fondo", 15.5, true, LocalDate.now()));
+        pistas.put(3, new Pista(3, "Pista Infantil", "Zona Entrada", 10.0, false, LocalDate.now()));
     }
+
     //Endpoint para crear una nueva pista
     @PostMapping("/courts")
     public ResponseEntity<Pista> crearPista(@RequestBody Pista pista) {
         pistas.put(pista.idPista(), pista);
         return ResponseEntity.status(HttpStatus.CREATED).body(pista);
     }
+
     //Endpoint para obtener todos los usuarios
     @GetMapping("/users")
     public ResponseEntity<List<Usuario>> obtenerUsuarios() {
         return ResponseEntity.ok(new ArrayList<>(usuarios.values()));
     }
+
     //Endpoint para obtener un usuario por su ID
     @GetMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario) {
@@ -56,6 +63,7 @@ public class PistaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
     //GET -> Listar pistas
     @GetMapping("/courts")
     public List<Pista> listarPistas(@RequestParam(required = false) Boolean active) {
@@ -120,6 +128,7 @@ public class PistaController {
 
         pistas.remove(courtId);
     }
+
     //Endpoint para modificar parcialmente un usuario
     @PatchMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos) {
@@ -169,7 +178,7 @@ public class PistaController {
         // Comprobar permisos (403)
         int userID = reserva.idUsuario();
         NombreRol rolex = usuarios.get(userID).rol().nombreRol();
-        if (rolex != NombreRol.ADMIN){
+        if (rolex != NombreRol.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -282,6 +291,6 @@ public class PistaController {
     public ResponseEntity<String> checkHealth() {
         return ResponseEntity.ok("La API de Pádel está funcionando correctamente");
     }
-
-
 }
+
+
