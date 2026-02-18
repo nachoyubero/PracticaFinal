@@ -376,7 +376,7 @@ public class PistaController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("No hay disponibilidad para el horario solicitado");
         }
 
-        // Crear reserva (todo en orden, 201)
+        // Crear reserva (en orden, 201)
         int nuevoId = reservas.keySet().stream().mapToInt(k -> k).max().orElse(0) + 1;
 
         Reserva nuevaReserva = new Reserva(
