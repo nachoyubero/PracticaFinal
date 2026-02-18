@@ -13,15 +13,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/pistaPadel/auth")
 public class AuthController {
 
-    private final Map<Integer, Usuario> usuarios = new HashMap<>();
-    private final Map<String, Integer> sesiones = new HashMap<>();
+    private final Memoria memoria;
     private final BCryptPasswordEncoder encoder;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public AuthController(BCryptPasswordEncoder encoder) {
+    public AuthController(Memoria memoria, BCryptPasswordEncoder encoder) {
+        this.memoria = memoria;
         this.encoder = encoder;
     }
 
@@ -29,16 +33,18 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public void register(@Valid @RequestBody RegisterRequest req) {
 
+        logger.info("Intento de registro para email: {}", req.email());
         String emailNorm = req.email().trim().toLowerCase();
 
-        boolean emailExiste = usuarios.values().stream()
+        boolean emailExiste = memoria.usuarios.values().stream()
                 .anyMatch(u -> u.email().equalsIgnoreCase(emailNorm));
 
         if (emailExiste) {
+            logger.warn("Login fallido para email: {}", emailNorm);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso.");
         }
 
-        int nuevoId = usuarios.keySet().stream().mapToInt(x -> x).max().orElse(0) + 1;
+        int nuevoId = memoria.usuarios.keySet().stream().mapToInt(x -> x).max().orElse(0) + 1;
 
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
 
@@ -54,27 +60,34 @@ public class AuthController {
                 emailNorm
         );
 
-        usuarios.put(nuevoId, nuevo);
+        memoria.usuarios.put(nuevoId, nuevo);
+        logger.info("Usuario registrado correctamente con email: {}", emailNorm);
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     public LoginResponse login(@Valid @RequestBody LoginRequest req) {
 
+        logger.info("Intento de login para email: {}", req.email());
         String emailNorm = req.email().trim().toLowerCase();
 
-        Usuario usuario = usuarios.values().stream()
+        Usuario usuario = memoria.usuarios.values().stream()
                 .filter(u -> u.email().equalsIgnoreCase(emailNorm))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas"));
+                .orElseThrow(() -> {
+                    logger.warn("Login fallido: usuario no encontrado para {}", emailNorm);
+                    return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
+                });
 
         if (!encoder.matches(req.password(), usuario.password())) {
+            logger.warn("Registro rechazado: email ya en uso {}", emailNorm);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
         }
 
         String token = UUID.randomUUID().toString();
-        sesiones.put(token, usuario.idUsuario());
+        memoria.sesiones.put(token, usuario.idUsuario());
 
+        logger.info("Login correcto para usuario id: {}", usuario.idUsuario());
         return new LoginResponse(token);
     }
 
@@ -85,12 +98,18 @@ public class AuthController {
 
         String token = extraerToken(authorization);
 
-        if (token == null || !sesiones.containsKey(token)) {
+        if (token == null || !memoria.sesiones.containsKey(token)) {
+            logger.warn("Logout rechazado: no autenticado (token ausente o inválido)");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
 
-        sesiones.remove(token);
+        Integer userId = memoria.sesiones.get(token);
+
+        memoria.sesiones.remove(token);
+
+        logger.info("Logout realizado correctamente para usuario id: {}", userId);
     }
+
 
     private String extraerToken(String authorization) {
         if (authorization == null) return null;
@@ -104,16 +123,19 @@ public class AuthController {
 
         String token = extraerToken(authorization);
 
-        if (token == null || !sesiones.containsKey(token)) {
+        if (token == null || !memoria.sesiones.containsKey(token)) {
+            logger.warn("Acceso rechazado: no autenticado (token ausente o inválido");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
 
-        Integer userId = sesiones.get(token);
-        Usuario usuario = usuarios.get(userId);
+        Integer userId = memoria.sesiones.get(token);
+        Usuario usuario = memoria.usuarios.get(userId);
 
         if (usuario == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
+
+        logger.debug("Consulta de datos personales para usuario id: {}", userId);
 
         return new MeResponse(
                 usuario.idUsuario(),

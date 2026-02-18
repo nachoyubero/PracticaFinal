@@ -18,7 +18,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class ConfiguracionSeguridad {
 
-
     @Bean
     public SecurityFilterChain configuracion(HttpSecurity http) throws Exception {
         http
@@ -27,6 +26,10 @@ public class ConfiguracionSeguridad {
                         // 1. RUTAS PÚBLICAS
                         .requestMatchers("/pistaPadel/auth/**").permitAll()
                         .requestMatchers("/pistaPadel/health").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/pistaPadel/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/pistaPadel/reservations/**").authenticated()
+
+
 
                         // 2. RUTAS DE ADMIN (POST, PUT, DELETE)
                         .requestMatchers(HttpMethod.POST, "/pistaPadel/**").hasRole("ADMIN")
