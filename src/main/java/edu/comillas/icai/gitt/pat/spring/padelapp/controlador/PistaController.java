@@ -29,7 +29,7 @@ public class PistaController {
     private final Map<Integer, Reserva> reservas = new HashMap<>();
 
 
-    public PistaController() {
+    public PistaController(){
         Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
         //Declaramos los roles y usuarios de prueba

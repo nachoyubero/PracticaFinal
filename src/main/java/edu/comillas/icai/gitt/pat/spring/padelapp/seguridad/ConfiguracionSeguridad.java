@@ -22,7 +22,6 @@ public class ConfiguracionSeguridad {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/pistaPadel/auth/**").permitAll()
-                        // 1. REGLAS ESPECÍFICAS (Orden: de más específico a más general)
                         // Solo ADMIN puede modificar datos (POST, PUT, PATCH, DELETE)
                         .requestMatchers(HttpMethod.POST, "/pistaPadel/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/pistaPadel/**").hasRole("ADMIN")
