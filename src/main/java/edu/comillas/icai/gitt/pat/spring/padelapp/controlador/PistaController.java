@@ -30,6 +30,8 @@ public class PistaController {
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
         memoria.usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
         memoria.usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
+        memoria.usuarios.put(3, new Usuario(2, "Lola", "lolita123", "López", true, LocalDateTime.now(), "600333445", rolUser, "lolita@test.com"));
+
         memoria.reservas.put(2, new Reserva( 2,
                 2,
                 1,
@@ -202,20 +204,24 @@ public class PistaController {
     @PatchMapping("/reservations/{reservationId}")
     public ResponseEntity<?> modificarReserva(
             @PathVariable Integer reservationId,
+            @RequestParam Integer userId,
             @RequestBody Reserva nuevosDatos
     ) {
-
-        // Buscar la reserva actual
         Reserva reservaActual = memoria.reservas.get(reservationId);
         if (reservaActual == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // Comprobar permisos
-        int userID = reservaActual.idUsuario();
-        NombreRol rolex = memoria.usuarios.get(userID).rol().nombreRol();
-        if (rolex != NombreRol.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
+        Usuario solicitante = memoria.usuarios.get(userId);
+        if (solicitante == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario solicitante no identificado");
+        }
+
+        boolean esDueno = reservaActual.idUsuario().equals(userId);
+        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;
+
+        if (!esDueno && !esAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         LocalDate nuevaFecha = nuevosDatos.fechaReserva() != null ? nuevosDatos.fechaReserva() : reservaActual.fechaReserva();
@@ -223,29 +229,29 @@ public class PistaController {
         Integer nuevaDuracion = nuevosDatos.duracionMinutos() != null ? nuevosDatos.duracionMinutos() : reservaActual.duracionMinutos();
         Integer nuevaPista = nuevosDatos.idPista() != null ? nuevosDatos.idPista() : reservaActual.idPista();
 
-        // Validación
         LocalDateTime nuevaFechaHora = LocalDateTime.of(nuevaFecha, nuevaHora);
         if (nuevaFechaHora.isBefore(LocalDateTime.now())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La nueva fecha es inválida (pasada)"); // 400
+            return ResponseEntity.badRequest().body("La nueva fecha es inválida (pasada)");
         }
 
-        // Conflicto (409)
-        boolean pistaOcupada =memoria.reservas.values().stream()
-                .filter(r -> !r.idReserva().equals(reservationId))
-                .filter(r -> r.idPista().equals(nuevaPista))       // Misma pista
-                .filter(r -> r.fechaReserva().equals(nuevaFecha))  // Mismo día
+        // 5. Comprobar conflicto (Ignorando la propia reserva)
+        boolean hayConflicto = memoria.reservas.values().stream()
+                .filter(r -> !r.idReserva().equals(reservationId)) // IMPORTANTE: No chocamos con nosotros mismos
+                .filter(r -> r.idPista().equals(nuevaPista))
+                .filter(r -> r.fechaReserva().equals(nuevaFecha))
+                .filter(r -> r.estado() != Estado.CANCELADA)
                 .anyMatch(r -> {
                     LocalTime finExistente = r.getHoraFin();
                     LocalTime finNuevo = nuevaHora.plusMinutes(nuevaDuracion);
-
+                    // Solapamiento: (StartA < EndB) && (EndA > StartB)
                     return nuevaHora.isBefore(finExistente) && finNuevo.isAfter(r.horaInicio());
                 });
 
-        if (pistaOcupada) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El nuevo horario ya está ocupado"); // 409
+        if (hayConflicto) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("El nuevo horario ya está ocupado");
         }
 
-        // Actualizar y guardar (200)
+        // 6. Guardar cambios
         Reserva reservaActualizada = new Reserva(
                 reservaActual.idReserva(),
                 reservaActual.idUsuario(),

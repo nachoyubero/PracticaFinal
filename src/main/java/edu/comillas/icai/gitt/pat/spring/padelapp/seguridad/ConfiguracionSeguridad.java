@@ -27,6 +27,8 @@ public class ConfiguracionSeguridad {
                         .requestMatchers("/pistaPadel/auth/**").permitAll()
                         .requestMatchers("/pistaPadel/health").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/pistaPadel/reservations/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/pistaPadel/reservations/**").authenticated()
+
 
 
                         // 2. RUTAS DE ADMIN (POST, PUT, DELETE)
