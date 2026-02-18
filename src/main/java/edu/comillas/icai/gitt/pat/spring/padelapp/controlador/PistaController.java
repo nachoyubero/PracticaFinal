@@ -28,6 +28,25 @@ public class PistaController {
         this.memoria = memoria;
         Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
+        memoria.usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
+        memoria.usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
+        memoria.reservas.put(2, new Reserva( 2,
+                2,
+                1,
+                Estado.ACTIVA,
+                LocalDate.now().plusDays(1),
+                LocalTime.of(17, 0),
+                LocalDate.now(),
+                90));
+        memoria.pistas.put(1, new Pista(
+                1,
+                "Central 1",
+                "Club Madrid Norte",
+                25.0,
+                true,
+                LocalDate.now()
+        ));
+
     }
     //Endpoint para crear una nueva pista
     @PostMapping("/courts")
