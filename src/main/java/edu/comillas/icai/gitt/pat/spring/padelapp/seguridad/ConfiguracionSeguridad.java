@@ -6,9 +6,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -16,14 +18,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class ConfiguracionSeguridad {
 
+
     @Bean
     public SecurityFilterChain configuracion(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
+                        // 1. RUTAS PÚBLICAS
                         .requestMatchers("/pistaPadel/auth/**").permitAll()
-                        // 1. REGLAS ESPECÍFICAS (Orden: de más específico a más general)
-                        // Solo ADMIN puede modificar datos (POST, PUT, PATCH, DELETE)
+                        .requestMatchers("/pistaPadel/health").permitAll()
+
+                        // 2. RUTAS DE ADMIN (POST, PUT, DELETE)
                         .requestMatchers(HttpMethod.POST, "/pistaPadel/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/pistaPadel/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/pistaPadel/**").hasRole("ADMIN")
@@ -31,24 +36,23 @@ public class ConfiguracionSeguridad {
 
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults()); // Basic Auth para Postman
 
         return http.build();
     }
 
     @Bean
-    public UserDetailsService usuarios() {
-        // Definimos un ADMIN y un USER en memoria para probar
-        UserDetails admin = User.withDefaultPasswordEncoder()
+    public UserDetailsService usuarios(PasswordEncoder encoder) {
+
+        UserDetails admin = User.builder()
                 .username("admin")
-                .password("admin123")
+                .password(encoder.encode("admin123"))
                 .roles("ADMIN")
                 .build();
 
-        UserDetails user = User.withDefaultPasswordEncoder()
+        UserDetails user = User.builder()
                 .username("user")
-                .password("user123")
+                .password(encoder.encode("user123"))
                 .roles("USER")
                 .build();
 
