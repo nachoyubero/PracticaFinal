@@ -234,6 +234,7 @@ public class PistaController {
     ) {
         logger.info("Modificar reserva: reservationId={}", reservationId);
 
+        
         // Buscar la reserva actual
         Reserva reservaActual = memoria.reservas.get(reservationId);
         if (reservaActual == null) {
