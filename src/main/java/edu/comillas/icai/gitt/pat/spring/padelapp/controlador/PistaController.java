@@ -283,6 +283,57 @@ public class PistaController {
         return ResponseEntity.ok("La API de Pádel está funcionando correctamente");
     }
 
+    // comprobación de availability (de una o más pistas)
+    @GetMapping("/availability")
+    public ResponseEntity<?> consultarDisponibilidad(
+            @RequestParam LocalDate date,
+            @RequestParam(required = false) Integer courtId
+    ) {
+        if (date.isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body("La fecha debe de ser futura");
+        }
+
+        List<Disponibilidad> resultado = new ArrayList<>();
+
+        // si se incluye la pista
+        if (courtId != null) {
+            if (pistas.containsKey(courtId)) {
+                resultado.add(calcularDisponibilidadPista(pistas.get(courtId), date));
+            } else {
+                // Si la pista no existe tenemos dos opciones, 404 o devolver lista vacía
+                // Nos convence más 404
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista solicitada no existe");
+            }
+        } else {
+            // Todas las pistas activas
+            // iteramos y añadimos disponibilidades
+            pistas.values().stream()
+                    .filter(Pista::activa)
+                    .forEach(p -> resultado.add(calcularDisponibilidadPista(p, date)));
+        }
+
+        // devolvemos 200 con el resultado
+        return ResponseEntity.ok(resultado);
+    }
+
+    // comprobación de availability
+    @GetMapping("/courts/{courtId}/availability")
+    public ResponseEntity<?> consultarDisponibilidadPorId(
+            @PathVariable Integer courtId,
+            @RequestParam LocalDate date
+    ) {
+        if (!pistas.containsKey(courtId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista no existe.");
+        }
+
+        // Comprobar validez de la fecha
+        if (date.isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body("No se puede consultar disponibilidad de fechas pasadas.");
+        }
+
+        // igual que en el anterior, devuelvo un ok con la disponibilidad (o falta de)
+        return ResponseEntity.ok(calcularDisponibilidadPista(pistas.get(courtId), date));
+    }
 
     // funcion para comprobar disponibilidad
     private Disponibilidad calcularDisponibilidadPista(Pista pista, LocalDate fecha) {
