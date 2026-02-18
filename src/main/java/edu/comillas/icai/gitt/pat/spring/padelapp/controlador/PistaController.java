@@ -14,10 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //Definimos el controlador REST para gestionar pistas y usuarios
 @RestController
@@ -396,6 +393,63 @@ public class PistaController {
         reservas.put(nuevoId, nuevaReserva);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaReserva);
+    }
+
+    // get reservas
+    @GetMapping("/reservations")
+    public ResponseEntity<?> misReservas(
+            @RequestParam Integer userId, // Usuario
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to
+    ) {
+        // Validar usuario (401)
+        if (!usuarios.containsKey(userId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no existe");
+        }
+
+        List<Reserva> listaReservas = reservas.values().stream()
+                .filter(r -> r.idUsuario().equals(userId)) // Filtro principal: Solo las mías
+                // Filtro de fecha 'from' (si existe)
+                .filter(r -> from == null || !r.fechaReserva().isBefore(from))
+                // Filtro de fecha 'to' (si existe)
+                .filter(r -> to == null || !r.fechaReserva().isAfter(to))
+                // Opcional: Ordenarlas por fecha y hora
+                .sorted(Comparator.comparing(Reserva::fechaReserva).thenComparing(Reserva::horaInicio))
+                .toList();
+
+        return ResponseEntity.ok(listaReservas); // 200 OK
+    }
+
+
+    // Get reserva por ID
+    @GetMapping("/reservations/{reservationId}")
+    public ResponseEntity<?> obtenerReserva(
+            @PathVariable Integer reservationId,
+            @RequestParam Integer userId // para comprobar si puede solicitar
+    ) {
+        // Comprobar que existe (Error 404)
+        Reserva reserva = reservas.get(reservationId);
+        if (reserva == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("La reserva no existe");
+        }
+
+        // comprobar que quien solicita existe (Error 401)
+        Usuario solicitante = usuarios.get(userId);
+        if (solicitante == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no identificado");
+        }
+
+        // comprobar permisos (Error 403)
+        // solo podrá si es dueño o admin
+        boolean esDueno = reserva.idUsuario().equals(userId);
+        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;
+
+        if (!esDueno && !esAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para ver esta reserva.");
+        }
+
+        // devolver reserva
+        return ResponseEntity.ok(reserva);
     }
 
     // funcion para comprobar disponibilidad
