@@ -49,7 +49,7 @@ public class ManejoGlobalErrores {
     public ResponseEntity<ModeloErrorRespuesta> manejarErrorGenerico(Exception ex, HttpServletRequest request) {
 
         ModeloErrorRespuesta error = new ModeloErrorRespuesta(
-                "Error interno del servidor: " + ex.getMessage(), // En producción, pon un mensaje genérico
+                "Error interno del servidor: " + ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 request.getRequestURI(),
                 LocalDateTime.now()
