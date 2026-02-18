@@ -22,4 +22,4 @@ public class FranjaHoraria {
                 return fin;
         }
 }
-}
+
