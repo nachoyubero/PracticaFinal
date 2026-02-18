@@ -24,8 +24,8 @@ public class PistaController {
     private final Memoria memoria;
 
 
-    public PistaController() {
-        this.memoria = new Memoria();
+    public PistaController(Memoria memoria) {
+        this.memoria = memoria;
         Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
     }
