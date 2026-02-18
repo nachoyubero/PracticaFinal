@@ -1,10 +1,8 @@
 package edu.comillas.icai.gitt.pat.spring.padelapp.controlador;
 
+import edu.comillas.icai.gitt.pat.spring.padelapp.clases.FranjaHoraria;
 import edu.comillas.icai.gitt.pat.spring.padelapp.clases.NombreRol;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Pista;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Reserva;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Rol;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Usuario;
+import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +119,7 @@ public class PistaController {
 
         pistas.remove(courtId);
     }
+
     //Endpoint para modificar parcialmente un usuario
     @PatchMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos) {
@@ -283,5 +283,46 @@ public class PistaController {
         return ResponseEntity.ok("La API de Pádel está funcionando correctamente");
     }
 
+
+    // funcion para comprobar disponibilidad
+    private Disponibilidad calcularDisponibilidadPista(Pista pista, LocalDate fecha) {
+        // Tomamos que abrimos a las 9 y cerramos a las 22
+        LocalTime horaApertura = LocalTime.of(9, 0);
+        LocalTime horaCierre = LocalTime.of(22, 0);
+
+        List<FranjaHoraria> franjasLibres = new ArrayList<>();
+
+        // Filtramos reservas de la pista y la fecha, quitando las canceladas
+        // las ordenamos por orden de hora de inicio
+        List<Reserva> reservasOrdenadas = reservas.values().stream()
+                .filter(r -> r.idPista().equals(pista.idPista()))
+                .filter(r -> r.fechaReserva().equals(fecha))
+                .filter(r -> r.estado() != edu.comillas.icai.gitt.pat.spring.padelapp.clases.Estado.CANCELADA)
+                .sorted((r1, r2) -> r1.horaInicio().compareTo(r2.horaInicio()))
+                .toList();
+
+        // iteramos desde la hora de apertura
+        LocalTime ultimoFin = horaApertura;
+
+        for (Reserva reserva : reservasOrdenadas) {
+            LocalTime inicioReserva = reserva.horaInicio();
+            LocalTime finReserva = reserva.getHoraFin();
+
+            // Si hay espacio entre ultimoFin y la siguiente reserva
+            if (ultimoFin.isBefore(inicioReserva)) {
+                // se añade como hueco libre
+                franjasLibres.add(new FranjaHoraria(ultimoFin, inicioReserva));
+            }
+
+            ultimoFin = finReserva;
+        }
+
+        // Comprobar hasta cierre
+        if (ultimoFin.isBefore(horaCierre)) {
+            franjasLibres.add(new FranjaHoraria(ultimoFin, horaCierre));
+        }
+
+        return new Disponibilidad(pista.idPista(), fecha, franjasLibres);
+    }
 
 }
