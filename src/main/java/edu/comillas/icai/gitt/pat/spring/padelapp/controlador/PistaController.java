@@ -159,11 +159,11 @@ public class PistaController {
     @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<String> cancelarReserva(@PathVariable Integer reservationId) {
 
-        // Buscar la reserva (aquí llamarías a tu lista, mapa o base de datos)
+        // Buscar la reserva
         Reserva reserva = reservas.get(reservationId);
 
         if (reserva == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Error 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         // Comprobar permisos (403)
