@@ -24,34 +24,33 @@ import java.util.Map;
 @RequestMapping("/pistaPadel")
 public class PistaController {
     //Creamos hashmaps al no tener persistencia
-    private final Map<Integer, Usuario> usuarios = new HashMap<>();
-    private final Map<Integer, Pista> pistas = new HashMap<>();
-    private final Map<Integer, Reserva> reservas = new HashMap<>();
+    private final Memoria memoria;
 
 
-    public PistaController() {
+    public PistaController(Memoria memoria) {
+        this.memoria = memoria;
         Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
         //Declaramos los roles y usuarios de prueba
-        usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
-        usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
+        memoria.usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
+        memoria.usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
     }
     //Endpoint para crear una nueva pista
     @PostMapping("/courts")
     public ResponseEntity<Pista> crearPista(@RequestBody Pista pista) {
-        pistas.put(pista.idPista(), pista);
+        memoria.pistas.put(pista.idPista(), pista);
         return ResponseEntity.status(HttpStatus.CREATED).body(pista);
     }
     //Endpoint para obtener todos los usuarios
     @GetMapping("/users")
     public ResponseEntity<List<Usuario>> obtenerUsuarios() {
-        return ResponseEntity.ok(new ArrayList<>(usuarios.values()));
+        return ResponseEntity.ok(new ArrayList<>(memoria.usuarios.values()));
     }
     //Endpoint para obtener un usuario por su ID
     @GetMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario) {
-        if (usuarios.containsKey(idUsuario)) {
-            return ResponseEntity.ok(usuarios.get(idUsuario));
+        if (memoria.usuarios.containsKey(idUsuario)) {
+            return ResponseEntity.ok(memoria.usuarios.get(idUsuario));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -61,31 +60,31 @@ public class PistaController {
     public List<Pista> listarPistas(@RequestParam(required = false) Boolean active) {
         if (active != null) {
             // Filtramos el mapa de pistas según si están activas o no
-            return pistas.values().stream()
+            return memoria.pistas.values().stream()
                     .filter(p -> p.activa().equals(active))
                     .toList();
         }
         // Si no hay parámetro, devolvemos todas
-        return new ArrayList<>(pistas.values());
+        return new ArrayList<>(memoria.pistas.values());
     }
 
     //GET -> Detalle de una pista
     @GetMapping("/courts/{courtId}")
     public Pista obtenerDetallePista(@PathVariable Integer courtId) {
-        if (!pistas.containsKey(courtId)) {
+        if (!memoria.pistas.containsKey(courtId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista no existe");
         }
-        return pistas.get(courtId);
+        return memoria.pistas.get(courtId);
     }
 
     // PATCH -> Modificar pista
     @PatchMapping("/courts/{courtId}")
     public Pista modificarPista(@PathVariable Integer courtId, @RequestBody Pista datosNuevos) {
-        if (!pistas.containsKey(courtId)) {
+        if (!memoria.pistas.containsKey(courtId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        Pista existente = pistas.get(courtId);
+        Pista existente = memoria.pistas.get(courtId);
 
         // Al ser un Record, creamos una copia nueva con los cambios (operador ternario)
         Pista actualizada = new Pista(
@@ -97,7 +96,7 @@ public class PistaController {
                 existente.fechaAlta()
         );
 
-        pistas.put(courtId, actualizada);
+        memoria.pistas.put(courtId, actualizada);
         return actualizada;
     }
 
@@ -105,32 +104,32 @@ public class PistaController {
     @DeleteMapping("/courts/{courtId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarPista(@PathVariable Integer courtId) {
-        if (!pistas.containsKey(courtId)) {
+        if (!memoria.pistas.containsKey(courtId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
         // REGLA DE NEGOCIO (Error 409):
         // Miramos en el mapa de 'reservas' si alguna pertenece a esta pista
-        boolean tieneReservas = reservas.values().stream()
+        boolean tieneReservas = memoria.reservas.values().stream()
                 .anyMatch(r -> r.idPista().equals(courtId));
 
         if (tieneReservas) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede eliminar: la pista tiene reservas asociadas.");
         }
 
-        pistas.remove(courtId);
+        memoria.pistas.remove(courtId);
     }
     //Endpoint para modificar parcialmente un usuario
     @PatchMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos) {
-        if (!usuarios.containsKey(idUsuario)) {
+        if (!memoria.usuarios.containsKey(idUsuario)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");
         }
 
-        Usuario usuarioAntiguo = usuarios.get(idUsuario);
+        Usuario usuarioAntiguo = memoria.usuarios.get(idUsuario);
 
         if (datosNuevos.email() != null && !datosNuevos.email().equals(usuarioAntiguo.email())) {
-            boolean emailOcupado = usuarios.values().stream().anyMatch(u -> u.email().equals(datosNuevos.email()));
+            boolean emailOcupado = memoria.usuarios.values().stream().anyMatch(u -> u.email().equals(datosNuevos.email()));
             if (emailOcupado) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso.");
             }
@@ -152,7 +151,7 @@ public class PistaController {
                 datosNuevos.email() != null ? datosNuevos.email() : usuarioAntiguo.email()
         );
 
-        usuarios.put(idUsuario, usuarioActualizado);
+        memoria.usuarios.put(idUsuario, usuarioActualizado);
         return ResponseEntity.ok(usuarioActualizado);
     }
 
@@ -160,7 +159,7 @@ public class PistaController {
     public ResponseEntity<String> cancelarReserva(@PathVariable Integer reservationId) {
 
         // Buscar la reserva
-        Reserva reserva = reservas.get(reservationId);
+        Reserva reserva = memoria.reservas.get(reservationId);
 
         if (reserva == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -168,7 +167,7 @@ public class PistaController {
 
         // Comprobar permisos (403)
         int userID = reserva.idUsuario();
-        NombreRol rolex = usuarios.get(userID).rol().nombreRol();
+        NombreRol rolex = memoria.usuarios.get(userID).rol().nombreRol();
         if (rolex != NombreRol.ADMIN){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -181,7 +180,7 @@ public class PistaController {
         }
 
         // Borrar la reserva de tu sistema
-        reservas.remove(reservationId);
+        memoria.reservas.remove(reservationId);
         // Éxito (204)
         return ResponseEntity.noContent().build();
     }
@@ -193,14 +192,14 @@ public class PistaController {
     ) {
 
         // Buscar la reserva actual
-        Reserva reservaActual = reservas.get(reservationId);
+        Reserva reservaActual = memoria.reservas.get(reservationId);
         if (reservaActual == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404
         }
 
         // Comprobar permisos
         int userID = reservaActual.idUsuario();
-        NombreRol rolex = usuarios.get(userID).rol().nombreRol();
+        NombreRol rolex = memoria.usuarios.get(userID).rol().nombreRol();
         if (rolex != NombreRol.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
         }
@@ -217,7 +216,7 @@ public class PistaController {
         }
 
         // Conflicto (409)
-        boolean pistaOcupada = reservas.values().stream()
+        boolean pistaOcupada = memoria.reservas.values().stream()
                 .filter(r -> !r.idReserva().equals(reservationId))
                 .filter(r -> r.idPista().equals(nuevaPista))       // Misma pista
                 .filter(r -> r.fechaReserva().equals(nuevaFecha))  // Mismo día
@@ -244,7 +243,7 @@ public class PistaController {
                 nuevaDuracion
         );
 
-        reservas.put(reservationId, reservaActualizada);
+        memoria.reservas.put(reservationId, reservaActualizada);
 
         return ResponseEntity.ok(reservaActualizada);
     }
@@ -258,7 +257,7 @@ public class PistaController {
     ) {
 
         // Autenticación
-        Usuario usuarioPeticion = usuarios.get(adminId);
+        Usuario usuarioPeticion = memoria.usuarios.get(adminId);
         if (usuarioPeticion == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado"); // 401
         }
@@ -268,7 +267,7 @@ public class PistaController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: Se requiere rol ADMIN"); // 403
         }
 
-        List<Reserva> reservasFiltradas = reservas.values().stream()
+        List<Reserva> reservasFiltradas = memoria.reservas.values().stream()
                 .filter(r -> date == null || r.fechaReserva().equals(date))
                 .filter(r -> courtId == null || r.idPista().equals(courtId))
                 .filter(r -> userId == null || r.idUsuario().equals(userId))
