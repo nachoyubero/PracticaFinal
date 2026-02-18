@@ -154,32 +154,32 @@ public class PistaController {
     }
 
     @DeleteMapping("/reservations/{reservationId}")
-    public ResponseEntity<String> cancelarReserva(@PathVariable Integer reservationId) {
+    public ResponseEntity<String> cancelarReserva(@PathVariable Integer reservationId, @RequestParam Integer userId) {
 
-        // Buscar la reserva
         Reserva reserva = memoria.reservas.get(reservationId);
 
         if (reserva == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // Comprobar permisos (403)
-        int userID = reserva.idUsuario();
-        NombreRol rolex = memoria.usuarios.get(userID).rol().nombreRol();
-        if (rolex != NombreRol.ADMIN){
+        Usuario solicitante = memoria.usuarios.get(userId);
+        if (solicitante == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario solicitante no identificado");
+        }
+
+        boolean esDueno = reserva.idUsuario().equals(userId);
+        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;
+
+        if (!esDueno && !esAdmin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // Comprobar política
         LocalDateTime fechaHoraPartido = LocalDateTime.of(reserva.fechaReserva(), reserva.horaInicio());
         if (LocalDateTime.now().plusHours(24).isAfter(fechaHoraPartido)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("No se puede cancelar con menos de 24h de antelación"); // Error 409
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("No se puede cancelar con menos de 24h de antelación");
         }
 
-        // Borrar la reserva de tu sistema
         memoria.reservas.remove(reservationId);
-        // Éxito (204)
         return ResponseEntity.noContent().build();
     }
 
