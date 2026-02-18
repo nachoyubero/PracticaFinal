@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/pistaPadel/auth")
 public class AuthController {
@@ -20,6 +23,7 @@ public class AuthController {
     private final Map<Integer, Usuario> usuarios = new HashMap<>();
     private final Map<String, Integer> sesiones = new HashMap<>();
     private final BCryptPasswordEncoder encoder;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public AuthController(BCryptPasswordEncoder encoder) {
         this.encoder = encoder;
@@ -29,12 +33,14 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public void register(@Valid @RequestBody RegisterRequest req) {
 
+        logger.info("Intento de registro para email: {}", req.email());
         String emailNorm = req.email().trim().toLowerCase();
 
         boolean emailExiste = usuarios.values().stream()
                 .anyMatch(u -> u.email().equalsIgnoreCase(emailNorm));
 
         if (emailExiste) {
+            logger.warn("Login fallido para email: {}", emailNorm);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso.");
         }
 
@@ -55,26 +61,33 @@ public class AuthController {
         );
 
         usuarios.put(nuevoId, nuevo);
+        logger.info("Usuario registrado correctamente con email: {}", emailNorm);
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     public LoginResponse login(@Valid @RequestBody LoginRequest req) {
 
+        logger.info("Intento de login para email: {}", req.email());
         String emailNorm = req.email().trim().toLowerCase();
 
         Usuario usuario = usuarios.values().stream()
                 .filter(u -> u.email().equalsIgnoreCase(emailNorm))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas"));
+                .orElseThrow(() -> {
+                    logger.warn("Login fallido: usuario no encontrado para {}", emailNorm);
+                    return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
+                });
 
         if (!encoder.matches(req.password(), usuario.password())) {
+            logger.warn("Registro rechazado: email ya en uso {}", emailNorm);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
         }
 
         String token = UUID.randomUUID().toString();
         sesiones.put(token, usuario.idUsuario());
 
+        logger.info("Login correcto para usuario id: {}", usuario.idUsuario());
         return new LoginResponse(token);
     }
 
@@ -86,11 +99,17 @@ public class AuthController {
         String token = extraerToken(authorization);
 
         if (token == null || !sesiones.containsKey(token)) {
+            logger.warn("Logout rechazado: no autenticado (token ausente o inválido)");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
 
+        Integer userId = sesiones.get(token);
+
         sesiones.remove(token);
+
+        logger.info("Logout realizado correctamente para usuario id: {}", userId);
     }
+
 
     private String extraerToken(String authorization) {
         if (authorization == null) return null;
@@ -105,6 +124,7 @@ public class AuthController {
         String token = extraerToken(authorization);
 
         if (token == null || !sesiones.containsKey(token)) {
+            logger.warn("Acceso rechazado: no autenticado (token ausente o inválido");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
 
@@ -114,6 +134,8 @@ public class AuthController {
         if (usuario == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
+
+        logger.debug("Consulta de datos personales para usuario id: {}", userId);
 
         return new MeResponse(
                 usuario.idUsuario(),
