@@ -1,5 +1,6 @@
 package edu.comillas.icai.gitt.pat.spring.padelapp.controlador;
 
+import edu.comillas.icai.gitt.pat.spring.padelapp.clases.Estado;
 import edu.comillas.icai.gitt.pat.spring.padelapp.clases.FranjaHoraria;
 import edu.comillas.icai.gitt.pat.spring.padelapp.clases.NombreRol;
 import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.*;
@@ -333,6 +334,68 @@ public class PistaController {
 
         // igual que en el anterior, devuelvo un ok con la disponibilidad (o falta de)
         return ResponseEntity.ok(calcularDisponibilidadPista(pistas.get(courtId), date));
+    }
+
+    // post de reserva
+    // POST /pistaPadel/reservations
+    // Usamos el propio record Reserva como entrada para simplificar
+    @PostMapping("/reservations")
+    public ResponseEntity<?> crearReserva(@RequestBody Reserva entrada) {
+
+        // validamos que todos los datos estan puestos
+        if (entrada.idUsuario() == null || entrada.idPista() == null || entrada.fechaReserva() == null ||
+                entrada.horaInicio() == null || entrada.duracionMinutos() == null) {
+            return ResponseEntity.badRequest().body("Faltan datos de la reserva");
+        }
+
+        // Comprobamos que la pista existe (404)
+        if (!pistas.containsKey(entrada.idPista())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("La pista solicitada no existe");
+        }
+
+        // Comprobamos que la fecha es futura (400)
+        LocalDateTime inicioReserva = LocalDateTime.of(entrada.fechaReserva(), entrada.horaInicio());
+        if (inicioReserva.isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("La fecha debe de ser futura");
+        }
+
+        // Comprobamos que la pista está disponible (409)
+        Pista pista = pistas.get(entrada.idPista());
+
+        // Calculamos los huecos libres
+        Disponibilidad disponibilidad = calcularDisponibilidadPista(pista, entrada.fechaReserva());
+
+        LocalTime horaFinSolicitada = entrada.horaInicio().plusMinutes(entrada.duracionMinutos());
+
+        // Comprobación de si la reserva entra
+        boolean hayHueco = disponibilidad.franjasDisponibles().stream().anyMatch(franja -> {
+            boolean empiezaBien = !entrada.horaInicio().isBefore(franja.getInicio());
+            boolean terminaBien = !horaFinSolicitada.isAfter(franja.getFin());
+            return empiezaBien && terminaBien;
+        });
+
+        // error 409
+        if (!hayHueco) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("No hay disponibilidad para el horario solicitado");
+        }
+
+        // Crear reserva (todo en orden, 201)
+        int nuevoId = reservas.keySet().stream().mapToInt(k -> k).max().orElse(0) + 1;
+
+        Reserva nuevaReserva = new Reserva(
+                nuevoId,
+                entrada.idUsuario(),
+                entrada.idPista(),
+                Estado.ACTIVA,
+                entrada.fechaReserva(),
+                entrada.horaInicio(),
+                LocalDate.now(),
+                entrada.duracionMinutos()
+        );
+
+        reservas.put(nuevoId, nuevaReserva);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaReserva);
     }
 
     // funcion para comprobar disponibilidad
