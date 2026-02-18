@@ -256,13 +256,18 @@ public class PistaController {
     ) {
 
         // Autenticación
+        System.out.println("--> [DEBUG] Entrando en GET /admin/reservations");
         Usuario usuarioPeticion = usuarios.get(adminId);
         if (usuarioPeticion == null) {
+            System.out.println("--> [ERROR] No existe ningún usuario en el Hashmap");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado"); // 401
         }
+        System.out.println("--> [bien] Usuario encontrado"+usuarioPeticion.nombre()+usuarioPeticion.rol().nombreRol());
 
         // Autorización
         if (usuarioPeticion.rol().nombreRol() != NombreRol.ADMIN) {
+            System.out.println("--> [mal] El user es no admin");
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: Se requiere rol ADMIN"); // 403
         }
 
