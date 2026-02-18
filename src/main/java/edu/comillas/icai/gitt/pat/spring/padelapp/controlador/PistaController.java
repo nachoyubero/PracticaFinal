@@ -1,10 +1,9 @@
 package edu.comillas.icai.gitt.pat.spring.padelapp.controlador;
 
+import edu.comillas.icai.gitt.pat.spring.padelapp.clases.Estado;
+import edu.comillas.icai.gitt.pat.spring.padelapp.clases.FranjaHoraria;
 import edu.comillas.icai.gitt.pat.spring.padelapp.clases.NombreRol;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Pista;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Reserva;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Rol;
-import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.Usuario;
+import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 
 //Definimos el controlador REST para gestionar pistas y usuarios
 @RestController
@@ -27,8 +24,8 @@ public class PistaController {
     private final Memoria memoria;
 
 
-    public PistaController(Memoria memoria) {
-        this.memoria = memoria;
+    public PistaController() {
+        this.memoria = new Memoria();
         Rol rolAdmin = new Rol(1, NombreRol.ADMIN, "Administrador del sistema");
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
     }
@@ -116,6 +113,7 @@ public class PistaController {
 
         memoria.pistas.remove(courtId);
     }
+
     //Endpoint para modificar parcialmente un usuario
     @PatchMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos) {
@@ -213,7 +211,7 @@ public class PistaController {
         }
 
         // Conflicto (409)
-        boolean pistaOcupada = memoria.reservas.values().stream()
+        boolean pistaOcupada =memoria.reservas.values().stream()
                 .filter(r -> !r.idReserva().equals(reservationId))
                 .filter(r -> r.idPista().equals(nuevaPista))       // Misma pista
                 .filter(r -> r.fechaReserva().equals(nuevaFecha))  // Mismo día
@@ -254,13 +252,18 @@ public class PistaController {
     ) {
 
         // Autenticación
+        System.out.println("--> [DEBUG] Entrando en GET /admin/reservations");
         Usuario usuarioPeticion = memoria.usuarios.get(adminId);
         if (usuarioPeticion == null) {
+            System.out.println("--> [ERROR] No existe ningún usuario en el Hashmap");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado"); // 401
         }
+        System.out.println("--> [bien] Usuario encontrado"+usuarioPeticion.nombre()+usuarioPeticion.rol().nombreRol());
 
         // Autorización
         if (usuarioPeticion.rol().nombreRol() != NombreRol.ADMIN) {
+            System.out.println("--> [mal] El user es no admin");
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: Se requiere rol ADMIN"); // 403
         }
 
@@ -279,5 +282,216 @@ public class PistaController {
         return ResponseEntity.ok("La API de Pádel está funcionando correctamente");
     }
 
+    // comprobación de availability (de una o más pistas)
+    @GetMapping("/availability")
+    public ResponseEntity<?> consultarDisponibilidad(
+            @RequestParam LocalDate date,
+            @RequestParam(required = false) Integer courtId
+    ) {
+        if (date.isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body("La fecha debe de ser futura");
+        }
+
+        List<Disponibilidad> resultado = new ArrayList<>();
+
+        // si se incluye la pista
+        if (courtId != null) {
+            if (memoria.pistas.containsKey(courtId)) {
+                resultado.add(calcularDisponibilidadPista(memoria.pistas.get(courtId), date));
+            } else {
+                // Si la pista no existe tenemos dos opciones, 404 o devolver lista vacía
+                // Nos convence más 404
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista solicitada no existe");
+            }
+        } else {
+            // Todas las pistas activas
+            // iteramos y añadimos disponibilidades
+            memoria.pistas.values().stream()
+                    .filter(Pista::activa)
+                    .forEach(p -> resultado.add(calcularDisponibilidadPista(p, date)));
+        }
+
+        // devolvemos 200 con el resultado
+        return ResponseEntity.ok(resultado);
+    }
+
+    // comprobación de availability
+    @GetMapping("/courts/{courtId}/availability")
+    public ResponseEntity<?> consultarDisponibilidadPorId(
+            @PathVariable Integer courtId,
+            @RequestParam LocalDate date
+    ) {
+        if (!memoria.pistas.containsKey(courtId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista no existe.");
+        }
+
+        // Comprobar validez de la fecha
+        if (date.isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body("No se puede consultar disponibilidad de fechas pasadas.");
+        }
+
+        // igual que en el anterior, devuelvo un ok con la disponibilidad (o falta de)
+        return ResponseEntity.ok(calcularDisponibilidadPista(memoria.pistas.get(courtId), date));
+    }
+
+    // post de reserva
+    // POST /pistaPadel/reservations
+    // Usamos el propio record Reserva como entrada para simplificar
+    @PostMapping("/reservations")
+    public ResponseEntity<?> crearReserva(@RequestBody Reserva entrada) {
+
+        // validamos que todos los datos estan puestos
+        if (entrada.idUsuario() == null || entrada.idPista() == null || entrada.fechaReserva() == null ||
+                entrada.horaInicio() == null || entrada.duracionMinutos() == null) {
+            return ResponseEntity.badRequest().body("Faltan datos de la reserva");
+        }
+
+        // Comprobamos que la pista existe (404)
+        if (!memoria.pistas.containsKey(entrada.idPista())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("La pista solicitada no existe");
+        }
+
+        // Comprobamos que la fecha es futura (400)
+        LocalDateTime inicioReserva = LocalDateTime.of(entrada.fechaReserva(), entrada.horaInicio());
+        if (inicioReserva.isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("La fecha debe de ser futura");
+        }
+
+        // Comprobamos que la pista está disponible (409)
+        Pista pista = memoria.pistas.get(entrada.idPista());
+
+        // Calculamos los huecos libres
+        Disponibilidad disponibilidad = calcularDisponibilidadPista(pista, entrada.fechaReserva());
+
+        LocalTime horaFinSolicitada = entrada.horaInicio().plusMinutes(entrada.duracionMinutos());
+
+        // Comprobación de si la reserva entra
+        boolean hayHueco = disponibilidad.franjasDisponibles().stream().anyMatch(franja -> {
+            boolean empiezaBien = !entrada.horaInicio().isBefore(franja.getInicio());
+            boolean terminaBien = !horaFinSolicitada.isAfter(franja.getFin());
+            return empiezaBien && terminaBien;
+        });
+
+        // error 409
+        if (!hayHueco) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("No hay disponibilidad para el horario solicitado");
+        }
+
+        // Crear reserva (en orden, 201)
+        int nuevoId = memoria.reservas.keySet().stream().mapToInt(k -> k).max().orElse(0) + 1;
+
+        Reserva nuevaReserva = new Reserva(
+                nuevoId,
+                entrada.idUsuario(),
+                entrada.idPista(),
+                Estado.ACTIVA,
+                entrada.fechaReserva(),
+                entrada.horaInicio(),
+                LocalDate.now(),
+                entrada.duracionMinutos()
+        );
+
+        memoria.reservas.put(nuevoId, nuevaReserva);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaReserva);
+    }
+
+    // get reservas
+    @GetMapping("/reservations")
+    public ResponseEntity<?> misReservas(
+            @RequestParam Integer userId, // Usuario
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to
+    ) {
+        // Validar usuario (401)
+        if (!memoria.usuarios.containsKey(userId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no existe");
+        }
+
+        List<Reserva> listaReservas = memoria.reservas.values().stream()
+                .filter(r -> r.idUsuario().equals(userId)) // Filtro principal: Solo las mías
+                // Filtro de fecha 'from' (si existe)
+                .filter(r -> from == null || !r.fechaReserva().isBefore(from))
+                // Filtro de fecha 'to' (si existe)
+                .filter(r -> to == null || !r.fechaReserva().isAfter(to))
+                // Opcional: Ordenarlas por fecha y hora
+                .sorted(Comparator.comparing(Reserva::fechaReserva).thenComparing(Reserva::horaInicio))
+                .toList();
+
+        return ResponseEntity.ok(listaReservas); // 200 OK
+    }
+
+
+    // Get reserva por ID
+    @GetMapping("/reservations/{reservationId}")
+    public ResponseEntity<?> obtenerReserva(
+            @PathVariable Integer reservationId,
+            @RequestParam Integer userId // para comprobar si puede solicitar
+    ) {
+        // Comprobar que existe (Error 404)
+        Reserva reserva = memoria.reservas.get(reservationId);
+        if (reserva == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("La reserva no existe");
+        }
+
+        // comprobar que quien solicita existe (Error 401)
+        Usuario solicitante = memoria.usuarios.get(userId);
+        if (solicitante == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no identificado");
+        }
+
+        // comprobar permisos (Error 403)
+        // solo podrá si es dueño o admin
+        boolean esDueno = reserva.idUsuario().equals(userId);
+        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;
+
+        if (!esDueno && !esAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permisos para ver esta reserva.");
+        }
+
+        // devolver reserva
+        return ResponseEntity.ok(reserva);
+    }
+
+    // funcion para comprobar disponibilidad
+    private Disponibilidad calcularDisponibilidadPista(Pista pista, LocalDate fecha) {
+        // Tomamos que abrimos a las 9 y cerramos a las 22
+        LocalTime horaApertura = LocalTime.of(9, 0);
+        LocalTime horaCierre = LocalTime.of(22, 0);
+
+        List<FranjaHoraria> franjasLibres = new ArrayList<>();
+
+        // Filtramos reservas de la pista y la fecha, quitando las canceladas
+        // las ordenamos por orden de hora de inicio
+        List<Reserva> reservasOrdenadas = memoria.reservas.values().stream()
+                .filter(r -> r.idPista().equals(pista.idPista()))
+                .filter(r -> r.fechaReserva().equals(fecha))
+                .filter(r -> r.estado() != edu.comillas.icai.gitt.pat.spring.padelapp.clases.Estado.CANCELADA)
+                .sorted((r1, r2) -> r1.horaInicio().compareTo(r2.horaInicio()))
+                .toList();
+
+        // iteramos desde la hora de apertura
+        LocalTime ultimoFin = horaApertura;
+
+        for (Reserva reserva : reservasOrdenadas) {
+            LocalTime inicioReserva = reserva.horaInicio();
+            LocalTime finReserva = reserva.getHoraFin();
+
+            // Si hay espacio entre ultimoFin y la siguiente reserva
+            if (ultimoFin.isBefore(inicioReserva)) {
+                // se añade como hueco libre
+                franjasLibres.add(new FranjaHoraria(ultimoFin, inicioReserva));
+            }
+
+            ultimoFin = finReserva;
+        }
+
+        // Comprobar hasta cierre
+        if (ultimoFin.isBefore(horaCierre)) {
+            franjasLibres.add(new FranjaHoraria(ultimoFin, horaCierre));
+        }
+
+        return new Disponibilidad(pista.idPista(), fecha, franjasLibres);
+    }
 
 }

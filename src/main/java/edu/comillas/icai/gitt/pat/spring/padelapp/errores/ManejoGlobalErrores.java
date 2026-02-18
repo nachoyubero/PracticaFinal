@@ -5,76 +5,82 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class ManejoGlobalErrores {
 
-    // Esta clase va a moldear todas las respuestas de error que se lancen en el proyecto, para que tengan un formato uniforme y legible.
-    // Este captura los 404, 409, 400 que lancemos con ResponseStatusException en el controlador
+    // 1. Errores manuales (ResponseStatusException)
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ModeloErrorRespuesta> manejarErroresEstado(ResponseStatusException ex, HttpServletRequest request) {
+
+        // Limpiamos la URI para evitar XSS
+        String rutaSegura = HtmlUtils.htmlEscape(request.getRequestURI());
 
         ModeloErrorRespuesta error = new ModeloErrorRespuesta(
                 ex.getReason(),
                 ex.getStatusCode().value(),
-                request.getRequestURI(),
+                rutaSegura, // Usamos la ruta limpia
                 LocalDateTime.now()
         );
 
         return ResponseEntity.status(ex.getStatusCode()).body(error);
     }
 
-    // 2. Maneja errores de JSON mal hechos
+    // 2. Errores JSON mal formado
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ModeloErrorRespuesta> manejarJsonMalFormado(HttpMessageNotReadableException ex, HttpServletRequest request) {
 
         System.out.println("ERROR JSON CAPTURADO: " + ex.getMessage());
+        String rutaSegura = HtmlUtils.htmlEscape(request.getRequestURI());
+
         ModeloErrorRespuesta error = new ModeloErrorRespuesta(
                 "El formato del JSON enviado no es válido. Revisa tipos de datos y comas.",
                 HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI(),
+                rutaSegura,
                 LocalDateTime.now()
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    // Maneja errores de validación (@Valid)
+    // 3. Errores de validación (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ModeloErrorRespuesta> manejarValidacion(MethodArgumentNotValidException ex,
-                                                                  HttpServletRequest request) {
+    public ResponseEntity<ModeloErrorRespuesta> manejarValidacion(MethodArgumentNotValidException ex, HttpServletRequest request) {
 
         String mensaje = ex.getBindingResult().getFieldErrors().stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .findFirst()
                 .orElse("Datos inválidos");
 
+        String rutaSegura = HtmlUtils.htmlEscape(request.getRequestURI());
+
         ModeloErrorRespuesta error = new ModeloErrorRespuesta(
                 mensaje,
                 HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI(),
+                rutaSegura,
                 LocalDateTime.now()
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-
-    // Maneja error 500
+    // 4. Error genérico 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ModeloErrorRespuesta> manejarErrorGenerico(Exception ex, HttpServletRequest request) {
 
+        String rutaSegura = HtmlUtils.htmlEscape(request.getRequestURI());
+
         ModeloErrorRespuesta error = new ModeloErrorRespuesta(
-                "Error interno del servidor: " + ex.getMessage(), // En producción, pon un mensaje genérico
+                "Error interno del servidor: " + ex.getMessage(), // OJO: En producción aquí pondrías un mensaje genérico
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                request.getRequestURI(),
+                rutaSegura,
                 LocalDateTime.now()
         );
 
