@@ -8,6 +8,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
 
 import java.time.LocalDateTime;
 
@@ -43,6 +45,27 @@ public class ManejoGlobalErrores {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    // Maneja errores de validación (@Valid)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ModeloErrorRespuesta> manejarValidacion(MethodArgumentNotValidException ex,
+                                                                  HttpServletRequest request) {
+
+        String mensaje = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .findFirst()
+                .orElse("Datos inválidos");
+
+        ModeloErrorRespuesta error = new ModeloErrorRespuesta(
+                mensaje,
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
 
     // Maneja error 500
     @ExceptionHandler(Exception.class)
