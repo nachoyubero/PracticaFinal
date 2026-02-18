@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,6 +25,7 @@ import java.util.*;
 public class PistaController {
     //Creamos hashmaps al no tener persistencia
     private final Memoria memoria;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
 
     public PistaController(Memoria memoria) {
@@ -30,8 +34,6 @@ public class PistaController {
         Rol rolUser = new Rol(2, NombreRol.USER, "Jugador normal");
         memoria.usuarios.put(1, new Usuario(1, "Pepe", "admin123", "García", true, LocalDateTime.now(), "600111222", rolAdmin, "admin@test.com"));
         memoria.usuarios.put(2, new Usuario(2, "Laura", "laura123", "López", true, LocalDateTime.now(), "600333444", rolUser, "laura@test.com"));
-        memoria.usuarios.put(3, new Usuario(2, "Lola", "lolita123", "López", true, LocalDateTime.now(), "600333445", rolUser, "lolita@test.com"));
-
         memoria.reservas.put(2, new Reserva( 2,
                 2,
                 1,
@@ -54,25 +56,31 @@ public class PistaController {
     @PostMapping("/courts")
     public ResponseEntity<Pista> crearPista(@RequestBody Pista pista) {
         memoria.pistas.put(pista.idPista(), pista);
+        logger.info("Crear pista: id={}, nombre={}", pista.idPista(), pista.nombre());
+        logger.info("Pista creada OK: id={}", pista.idPista());
         return ResponseEntity.status(HttpStatus.CREATED).body(pista);
     }
     //Endpoint para obtener todos los usuarios
     @GetMapping("/users")
     public ResponseEntity<List<Usuario>> obtenerUsuarios() {
+        logger.debug("Listar usuarios");
         return ResponseEntity.ok(new ArrayList<>(memoria.usuarios.values()));
     }
     //Endpoint para obtener un usuario por su ID
     @GetMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable int idUsuario) {
+        logger.debug("Detalle usuario: id={}", idUsuario);
         if (memoria.usuarios.containsKey(idUsuario)) {
             return ResponseEntity.ok(memoria.usuarios.get(idUsuario));
         } else {
+            logger.warn("Detalle usuario: no existe id={}", idUsuario);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
     //GET -> Listar pistas
     @GetMapping("/courts")
     public List<Pista> listarPistas(@RequestParam(required = false) Boolean active) {
+        logger.debug("Listar pistas (active={})", active);
         if (active != null) {
             // Filtramos el mapa de pistas según si están activas o no
             return memoria.pistas.values().stream()
@@ -86,6 +94,7 @@ public class PistaController {
     //GET -> Detalle de una pista
     @GetMapping("/courts/{courtId}")
     public Pista obtenerDetallePista(@PathVariable Integer courtId) {
+        logger.debug("Detalle pista: id={}", courtId);
         if (!memoria.pistas.containsKey(courtId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista no existe");
         }
@@ -95,6 +104,7 @@ public class PistaController {
     // PATCH -> Modificar pista
     @PatchMapping("/courts/{courtId}")
     public Pista modificarPista(@PathVariable Integer courtId, @RequestBody Pista datosNuevos) {
+        logger.info("Modificar pista: id={}", courtId);
         if (!memoria.pistas.containsKey(courtId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -112,6 +122,7 @@ public class PistaController {
         );
 
         memoria.pistas.put(courtId, actualizada);
+        logger.info("Pista modificada OK: id={}", courtId);
         return actualizada;
     }
 
@@ -119,7 +130,10 @@ public class PistaController {
     @DeleteMapping("/courts/{courtId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarPista(@PathVariable Integer courtId) {
+        logger.info("Eliminar pista: id={}", courtId);
         if (!memoria.pistas.containsKey(courtId)) {
+            logger.warn("Eliminar pista: pista no existe id={}", courtId);
+
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
@@ -129,16 +143,22 @@ public class PistaController {
                 .anyMatch(r -> r.idPista().equals(courtId));
 
         if (tieneReservas) {
+            logger.warn("Eliminar pista: conflicto, tiene reservas id={}", courtId);
+
             throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede eliminar: la pista tiene reservas asociadas.");
         }
 
         memoria.pistas.remove(courtId);
+        logger.info("Pista eliminada OK: id={}", courtId);
+
     }
 
     //Endpoint para modificar parcialmente un usuario
     @PatchMapping("/users/{idUsuario}")
     public ResponseEntity<Usuario> modificarUsuario(@PathVariable int idUsuario, @RequestBody Usuario datosNuevos) {
+        logger.info("Modificar usuario: id={}", idUsuario);
         if (!memoria.usuarios.containsKey(idUsuario)) {
+            logger.warn("Modificar usuario: no existe id={}", idUsuario);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");
         }
 
@@ -147,11 +167,13 @@ public class PistaController {
         if (datosNuevos.email() != null && !datosNuevos.email().equals(usuarioAntiguo.email())) {
             boolean emailOcupado = memoria.usuarios.values().stream().anyMatch(u -> u.email().equals(datosNuevos.email()));
             if (emailOcupado) {
+                logger.warn("Modificar usuario: email en uso id={} email={}", idUsuario, datosNuevos.email());
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "El email " + datosNuevos.email() + " ya está en uso.");
             }
         }
 
         if (datosNuevos.email() != null && !datosNuevos.email().contains("@")) {
+            logger.warn("Modificar usuario: email inválido id={} email={}", idUsuario, datosNuevos.email());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El formato del email no es válido.");
         }
 
@@ -168,11 +190,13 @@ public class PistaController {
         );
 
         memoria.usuarios.put(idUsuario, usuarioActualizado);
+        logger.info("Usuario modificado OK: id={}", idUsuario);
         return ResponseEntity.ok(usuarioActualizado);
     }
 
     @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<String> cancelarReserva(@PathVariable Integer reservationId, @RequestParam Integer userId) {
+        logger.info("Cancelar reserva: reservationId={} solicitadoPorUserId={}", reservationId, userId);
 
         Reserva reserva = memoria.reservas.get(reservationId);
 
@@ -198,30 +222,30 @@ public class PistaController {
         }
 
         memoria.reservas.remove(reservationId);
+        logger.info("Reserva cancelada OK: reservationId={}", reservationId);
+
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/reservations/{reservationId}")
     public ResponseEntity<?> modificarReserva(
             @PathVariable Integer reservationId,
-            @RequestParam Integer userId,
             @RequestBody Reserva nuevosDatos
     ) {
+        logger.info("Modificar reserva: reservationId={}", reservationId);
+
+
+        // Buscar la reserva actual
         Reserva reservaActual = memoria.reservas.get(reservationId);
         if (reservaActual == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404
         }
 
-        Usuario solicitante = memoria.usuarios.get(userId);
-        if (solicitante == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario solicitante no identificado");
-        }
-
-        boolean esDueno = reservaActual.idUsuario().equals(userId);
-        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;
-
-        if (!esDueno && !esAdmin) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // Comprobar permisos
+        int userID = reservaActual.idUsuario();
+        NombreRol rolex = memoria.usuarios.get(userID).rol().nombreRol();
+        if (rolex != NombreRol.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403
         }
 
         LocalDate nuevaFecha = nuevosDatos.fechaReserva() != null ? nuevosDatos.fechaReserva() : reservaActual.fechaReserva();
@@ -229,29 +253,29 @@ public class PistaController {
         Integer nuevaDuracion = nuevosDatos.duracionMinutos() != null ? nuevosDatos.duracionMinutos() : reservaActual.duracionMinutos();
         Integer nuevaPista = nuevosDatos.idPista() != null ? nuevosDatos.idPista() : reservaActual.idPista();
 
+        // Validación
         LocalDateTime nuevaFechaHora = LocalDateTime.of(nuevaFecha, nuevaHora);
         if (nuevaFechaHora.isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("La nueva fecha es inválida (pasada)");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La nueva fecha es inválida (pasada)"); // 400
         }
 
-        // 5. Comprobar conflicto (Ignorando la propia reserva)
-        boolean hayConflicto = memoria.reservas.values().stream()
-                .filter(r -> !r.idReserva().equals(reservationId)) // IMPORTANTE: No chocamos con nosotros mismos
-                .filter(r -> r.idPista().equals(nuevaPista))
-                .filter(r -> r.fechaReserva().equals(nuevaFecha))
-                .filter(r -> r.estado() != Estado.CANCELADA)
+        // Conflicto (409)
+        boolean pistaOcupada =memoria.reservas.values().stream()
+                .filter(r -> !r.idReserva().equals(reservationId))
+                .filter(r -> r.idPista().equals(nuevaPista))       // Misma pista
+                .filter(r -> r.fechaReserva().equals(nuevaFecha))  // Mismo día
                 .anyMatch(r -> {
                     LocalTime finExistente = r.getHoraFin();
                     LocalTime finNuevo = nuevaHora.plusMinutes(nuevaDuracion);
-                    // Solapamiento: (StartA < EndB) && (EndA > StartB)
+
                     return nuevaHora.isBefore(finExistente) && finNuevo.isAfter(r.horaInicio());
                 });
 
-        if (hayConflicto) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El nuevo horario ya está ocupado");
+        if (pistaOcupada) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("El nuevo horario ya está ocupado"); // 409
         }
 
-        // 6. Guardar cambios
+        // Actualizar y guardar (200)
         Reserva reservaActualizada = new Reserva(
                 reservaActual.idReserva(),
                 reservaActual.idUsuario(),
@@ -264,6 +288,7 @@ public class PistaController {
         );
 
         memoria.reservas.put(reservationId, reservaActualizada);
+        logger.info("Reserva modificada OK: reservationId={}", reservationId);
 
         return ResponseEntity.ok(reservaActualizada);
     }
@@ -275,19 +300,18 @@ public class PistaController {
             @RequestParam(required = false) Integer courtId,
             @RequestParam(required = false) Integer userId
     ) {
+        logger.info("Admin listar reservas: adminId={} date={} courtId={} userId={}", adminId, date, courtId, userId);
 
         // Autenticación
-        System.out.println("--> [DEBUG] Entrando en GET /admin/reservations");
         Usuario usuarioPeticion = memoria.usuarios.get(adminId);
         if (usuarioPeticion == null) {
-            System.out.println("--> [ERROR] No existe ningún usuario en el Hashmap");
+            logger.warn("Admin listar reservas: usuario no existe adminId={}", adminId);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado"); // 401
         }
-        System.out.println("--> [bien] Usuario encontrado"+usuarioPeticion.nombre()+usuarioPeticion.rol().nombreRol());
 
         // Autorización
         if (usuarioPeticion.rol().nombreRol() != NombreRol.ADMIN) {
-            System.out.println("--> [mal] El user es no admin");
+            logger.warn("Admin listar reservas: forbidden adminId={}", adminId);
 
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: Se requiere rol ADMIN"); // 403
         }
@@ -299,6 +323,7 @@ public class PistaController {
                 .toList();
 
         // Éxito (200)
+        logger.info("Admin listar reservas OK: total={}", reservasFiltradas.size());
         return ResponseEntity.ok(reservasFiltradas);
     }
 
@@ -313,6 +338,7 @@ public class PistaController {
             @RequestParam LocalDate date,
             @RequestParam(required = false) Integer courtId
     ) {
+        logger.debug("Consultar disponibilidad: date={} courtId={}", date, courtId);
         if (date.isBefore(LocalDate.now())) {
             return ResponseEntity.badRequest().body("La fecha debe de ser futura");
         }
@@ -346,6 +372,7 @@ public class PistaController {
             @PathVariable Integer courtId,
             @RequestParam LocalDate date
     ) {
+        logger.debug("Consultar disponibilidad pista: courtId={} date={}", courtId, date);
         if (!memoria.pistas.containsKey(courtId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La pista no existe.");
         }
@@ -364,6 +391,8 @@ public class PistaController {
     // Usamos el propio record Reserva como entrada para simplificar
     @PostMapping("/reservations")
     public ResponseEntity<?> crearReserva(@RequestBody Reserva entrada) {
+        logger.info("Crear reserva: userId={} pistaId={} fecha={} hora={} duracion={}"
+                ,entrada.idUsuario(), entrada.idPista(), entrada.fechaReserva(), entrada.horaInicio(), entrada.duracionMinutos());
 
         // validamos que todos los datos estan puestos
         if (entrada.idUsuario() == null || entrada.idPista() == null || entrada.fechaReserva() == null ||
@@ -417,6 +446,7 @@ public class PistaController {
         );
 
         memoria.reservas.put(nuevoId, nuevaReserva);
+        logger.info("Reserva creada OK: id={}", nuevoId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaReserva);
     }
@@ -428,8 +458,11 @@ public class PistaController {
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to
     ) {
+        logger.debug("Mis reservas: userId={} from={} to={}", userId, from, to);
         // Validar usuario (401)
         if (!memoria.usuarios.containsKey(userId)) {
+            logger.warn("Mis reservas: usuario no existe userId={}", userId);
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no existe");
         }
 
@@ -453,15 +486,18 @@ public class PistaController {
             @PathVariable Integer reservationId,
             @RequestParam Integer userId // para comprobar si puede solicitar
     ) {
+        logger.debug("Detalle reserva: reservationId={} solicitadoPorUserId={}", reservationId, userId);
         // Comprobar que existe (Error 404)
         Reserva reserva = memoria.reservas.get(reservationId);
         if (reserva == null) {
+            logger.warn("Detalle reserva: no existe reservationId={}", reservationId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("La reserva no existe");
         }
 
         // comprobar que quien solicita existe (Error 401)
         Usuario solicitante = memoria.usuarios.get(userId);
         if (solicitante == null) {
+            logger.warn("Detalle reserva: solicitante no existe userId={}", userId);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no identificado");
         }
 
