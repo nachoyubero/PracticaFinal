@@ -29,7 +29,7 @@ public class ServicioAuth {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso.");
         }
         Rol rolUser = new Rol();
-        rolUser.setIdRol(2); // Asumiendo ID 2 para USER
+        rolUser.setIdRol(2);
 
         Usuario nuevo = new Usuario();
         nuevo.setNombre(req.nombre().trim());

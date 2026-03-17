@@ -24,7 +24,7 @@ public class ServicioPistas {
     @Autowired private RepoReserva repoReserva;
     @Autowired private RepoUsuario repoUsuario;
 
-    // --- PISTAS ---
+    //PISTAS
     public Pista crearPista(Pista pista) { return repoPista.save(pista); }
     public List<Pista> listarPistas(Boolean active) {
         if (active != null && active) return repoPista.findByActivaTrue();
@@ -48,7 +48,7 @@ public class ServicioPistas {
         repoPista.delete(pista);
     }
 
-    // --- DISPONIBILIDAD ---
+    //DISPONIBILIDAD
     public List<Disponibilidad> consultarDisponibilidadGlobal(LocalDate date) {
         if (date.isBefore(LocalDate.now())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fecha pasada");
         List<Disponibilidad> resultado = new ArrayList<>();
@@ -62,7 +62,7 @@ public class ServicioPistas {
         return calcularDisponibilidadPista(pista, date);
     }
 
-    // --- RESERVAS ---
+    // RESERVAS
     public Reserva crearReserva(Reserva entrada) {
         Pista pista = obtenerPista(entrada.getPista().getIdPista());
         Usuario usuario = repoUsuario.findById(entrada.getUsuario().getIdUsuario())
@@ -87,7 +87,7 @@ public class ServicioPistas {
         return repoReserva.save(entrada);
     }
 
-    // NUEVO: Mis Reservas
+    // Método Reservas
     public List<Reserva> obtenerMisReservas(Integer userId, LocalDate from, LocalDate to) {
         Usuario usuario = repoUsuario.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no existe"));
@@ -99,7 +99,7 @@ public class ServicioPistas {
                 .toList();
     }
 
-    // NUEVO: Detalle de reserva
+    // Detalles de reserva
     public Reserva obtenerReserva(Integer reservationId, Integer userId) {
         Reserva reserva = repoReserva.findById(reservationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La reserva no existe"));
@@ -113,7 +113,7 @@ public class ServicioPistas {
         return reserva;
     }
 
-    // NUEVO: Modificar/Reprogramar Reserva
+    // Modificar Reserva
     public Reserva modificarReserva(Integer reservationId, Reserva nuevosDatos, Integer userId) {
         Reserva existente = obtenerReserva(reservationId, userId); // Ya comprueba si existe y si tiene permiso
 
@@ -121,7 +121,7 @@ public class ServicioPistas {
         LocalTime nuevaHora = nuevosDatos.getHoraInicio() != null ? nuevosDatos.getHoraInicio() : existente.getHoraInicio();
         Integer nuevaDuracion = nuevosDatos.getDuracionMinutos() != null ? nuevosDatos.getDuracionMinutos() : existente.getDuracionMinutos();
 
-        // Comprobar conflicto (que no pise otra reserva)
+        // Comprobar reservas, evitamos sobreescritura con este método
         if (nuevosDatos.getFechaReserva() != null || nuevosDatos.getHoraInicio() != null) {
             LocalTime finNuevo = nuevaHora.plusMinutes(nuevaDuracion);
             boolean pistaOcupada = repoReserva.findByPistaAndFechaReserva(existente.getPista(), nuevaFecha).stream()
@@ -147,7 +147,7 @@ public class ServicioPistas {
         repoReserva.delete(reserva);
     }
 
-    // NUEVO: Reservas Admin
+    // Reservas Admin
     public List<Reserva> obtenerReservasAdmin(Integer adminId, LocalDate date, Integer courtId, Integer userId) {
         Usuario admin = repoUsuario.findById(adminId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
