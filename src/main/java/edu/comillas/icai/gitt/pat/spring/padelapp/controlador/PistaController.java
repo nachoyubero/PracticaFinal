@@ -26,39 +26,64 @@ public class PistaController {
 
     // --- RUTAS DE USUARIOS ---
     @GetMapping("/users")
-    public List<Usuario> obtenerUsuarios() {
+    public List<Usuario> obtenerUsuarios(
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.validarAdmin(auth);
         return servicioAuth.obtenerTodosUsuarios();
     }
+
     @GetMapping("/users/{id}")
-    public Usuario obtenerUsuario(@PathVariable Integer id) {
+    public Usuario obtenerUsuario(
+            @PathVariable Integer id,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.validarDuenioOAdmin(auth, id);
         return servicioAuth.obtenerUsuarioPorId(id);
     }
+
     @PatchMapping("/users/{id}")
-    public Usuario modificarUsuario(@PathVariable Integer id, @RequestBody Usuario datos) {
+    public Usuario modificarUsuario(
+            @PathVariable Integer id,
+            @RequestBody Usuario datos,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.validarDuenioOAdmin(auth, id);
         return servicioAuth.modificarUsuario(id, datos);
     }
 
     // --- RUTAS DE PISTAS ---
     @PostMapping("/courts")
     @ResponseStatus(HttpStatus.CREATED)
-    public Pista crearPista(@RequestBody Pista pista) {
+    public Pista crearPista(
+            @RequestBody Pista pista,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.validarAdmin(auth);
         return servicioPistas.crearPista(pista);
     }
+
     @GetMapping("/courts")
     public List<Pista> listarPistas(@RequestParam(required = false) Boolean active) {
         return servicioPistas.listarPistas(active);
     }
+
     @GetMapping("/courts/{id}")
     public Pista obtenerPista(@PathVariable Integer id) {
         return servicioPistas.obtenerPista(id);
     }
+
     @PatchMapping("/courts/{id}")
-    public Pista modificarPista(@PathVariable Integer id, @RequestBody Pista datos) {
+    public Pista modificarPista(
+            @PathVariable Integer id,
+            @RequestBody Pista datos,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.validarAdmin(auth);
         return servicioPistas.modificarPista(id, datos);
     }
+
     @DeleteMapping("/courts/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarPista(@PathVariable Integer id) {
+    public void eliminarPista(
+            @PathVariable Integer id,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.validarAdmin(auth);
         servicioPistas.eliminarPista(id);
     }
 
@@ -83,20 +108,27 @@ public class PistaController {
     // --- RUTAS DE RESERVAS ---
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
-    public Reserva crearReserva(@RequestBody Reserva reserva) {
+    public Reserva crearReserva(
+            @RequestBody Reserva reserva,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        servicioAuth.obtenerIdUsuarioDesdeToken(auth); // valida que está autenticado
         return servicioPistas.crearReserva(reserva);
     }
 
     @GetMapping("/reservations")
     public List<Reserva> misReservas(
-            @RequestParam Integer userId,
+            @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to) {
+        Integer userId = servicioAuth.obtenerIdUsuarioDesdeToken(auth);
         return servicioPistas.obtenerMisReservas(userId, from, to);
     }
 
     @GetMapping("/reservations/{reservationId}")
-    public Reserva obtenerReserva(@PathVariable Integer reservationId, @RequestParam Integer userId) {
+    public Reserva obtenerReserva(
+            @PathVariable Integer reservationId,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        Integer userId = servicioAuth.obtenerIdUsuarioDesdeToken(auth);
         return servicioPistas.obtenerReserva(reservationId, userId);
     }
 
@@ -104,23 +136,29 @@ public class PistaController {
     public Reserva reprogramarReserva(
             @PathVariable Integer reservationId,
             @RequestBody Reserva nuevosDatos,
-            @RequestParam Integer userId) {
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        Integer userId = servicioAuth.obtenerIdUsuarioDesdeToken(auth);
         return servicioPistas.modificarReserva(reservationId, nuevosDatos, userId);
     }
 
     @DeleteMapping("/reservations/{reservationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelarReserva(@PathVariable Integer reservationId, @RequestParam Integer userId) {
+    public void cancelarReserva(
+            @PathVariable Integer reservationId,
+            @RequestHeader(value = "Authorization", required = false) String auth) {
+        Integer userId = servicioAuth.obtenerIdUsuarioDesdeToken(auth);
         servicioPistas.cancelarReserva(reservationId, userId);
     }
 
     // --- RUTAS DE ADMIN ---
     @GetMapping("/admin/reservations")
     public List<Reserva> obtenerReservasAdmin(
-            @RequestParam Integer adminId,
+            @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) Integer courtId,
             @RequestParam(required = false) Integer userId) {
+        servicioAuth.validarAdmin(auth);
+        Integer adminId = servicioAuth.obtenerIdUsuarioDesdeToken(auth);
         return servicioPistas.obtenerReservasAdmin(adminId, date, courtId, userId);
     }
 }
