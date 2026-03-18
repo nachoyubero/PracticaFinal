@@ -2,6 +2,7 @@ package edu.comillas.icai.gitt.pat.spring.padelapp.servicios;
 
 import edu.comillas.icai.gitt.pat.spring.padelapp.clases.NombreRol;
 import edu.comillas.icai.gitt.pat.spring.padelapp.modelo.*;
+import edu.comillas.icai.gitt.pat.spring.padelapp.repositorio.RepoRol;
 import edu.comillas.icai.gitt.pat.spring.padelapp.repositorio.RepoUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,8 @@ public class ServicioAuth {
 
     @Autowired private RepoUsuario repoUsuario;
     @Autowired private BCryptPasswordEncoder encoder;
+    @Autowired private RepoRol repoRol;
+
     private final Map<String, Integer> sesionesActivas = new ConcurrentHashMap<>();
 
     public void register(RegisterRequest req) {
@@ -28,8 +31,9 @@ public class ServicioAuth {
         if (repoUsuario.findByEmail(emailNorm).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está en uso.");
         }
-        Rol rolUser = new Rol();
-        rolUser.setIdRol(2);
+        Rol rolUser = repoRol.findByNombreRol(NombreRol.USER)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "Rol USER no encontrado"));
 
         Usuario nuevo = new Usuario();
         nuevo.setNombre(req.nombre().trim());
@@ -110,5 +114,24 @@ public class ServicioAuth {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         }
         return sesionesActivas.get(token);
+    }
+
+    public void validarAdmin(String authHeader) {
+        Integer userId = obtenerIdUsuarioDesdeToken(authHeader); //
+        Usuario usuario = repoUsuario.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no existe"));
+        if (usuario.getRol().getNombreRol() != NombreRol.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Se requiere rol ADMIN");
+        }
+    }
+
+    public void validarDuenioOAdmin(String authHeader, Integer targetUserId) {
+        Integer requesterId = obtenerIdUsuarioDesdeToken(authHeader);
+        if (requesterId.equals(targetUserId)) return;
+        Usuario solicitante = repoUsuario.findById(requesterId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no existe"));
+        if (solicitante.getRol().getNombreRol() != NombreRol.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos");
+        }
     }
 }
