@@ -83,7 +83,7 @@ class DisponibilidadControllerTest {
         crearPistaEnBd("Pista 1", true);
 
         mockMvc.perform(get("/pistaPadel/availability"))
-                .andExpect(status().isInternalServerError());    }
+                .andExpect(status().isBadRequest());    }
 
     @Test
     void consultarDisponibilidadPorId_devuelve200() throws Exception {
@@ -116,7 +116,7 @@ class DisponibilidadControllerTest {
         Integer pistaId = crearPistaEnBd("Pista Sin Fecha", true);
 
         mockMvc.perform(get("/pistaPadel/courts/{courtId}/availability", pistaId))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
