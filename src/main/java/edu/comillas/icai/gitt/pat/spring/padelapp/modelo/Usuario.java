@@ -2,6 +2,9 @@ package edu.comillas.icai.gitt.pat.spring.padelapp.modelo;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 
 @Entity
 public class Usuario {
@@ -12,6 +15,8 @@ public class Usuario {
 
     private String nombre;
     private String apellidos;
+
+    @JsonIgnore
     private String password;
     private String email;
     private String telefono;
