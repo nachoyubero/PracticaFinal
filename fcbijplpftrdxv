@@ -1,0 +1,99 @@
+[1mdiff --git a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/AuthController.java b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/AuthController.java[m
+[1mindex 9dfd2e2..d3cd465 100644[m
+[1m--- a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/AuthController.java[m
+[1m+++ b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/AuthController.java[m
+[36m@@ -128,6 +128,8 @@[m [mpublic class AuthController {[m
+             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");[m
+         }[m
+ [m
+[32m+[m
+[32m+[m
+         Integer userId = memoria.sesiones.get(token);[m
+         Usuario usuario = memoria.usuarios.get(userId);[m
+ [m
+[36m@@ -143,7 +145,8 @@[m [mpublic class AuthController {[m
+                 usuario.apellidos(),[m
+                 usuario.email(),[m
+                 usuario.telefono(),[m
+[31m-                usuario.rol().nombreRol().name()[m
+[32m+[m[32m                usuario.rol().nombreRol().name(),[m
+[32m+[m[32m                usuario.baneado()[m
+         );[m
+     }[m
+ [m
+[1mdiff --git a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/PistaController.java b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/PistaController.java[m
+[1mindex c1bdfbd..d01c0db 100644[m
+[1m--- a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/PistaController.java[m
+[1m+++ b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/controlador/PistaController.java[m
+[36m@@ -162,6 +162,14 @@[m [mpublic class PistaController {[m
+             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario con ID " + idUsuario + " no existe.");[m
+         }[m
+ [m
+[32m+[m[32m        Usuario usuarioBaneado = memoria.usuarios.get(idUsuario);[m
+[32m+[m[32m        Usuario solicitante = memoria.usuarios.get(idUsuario);[m
+[32m+[m[32m        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;[m
+[32m+[m
+[32m+[m[32m        if (!esAdmin) {[m
+[32m+[m[32m            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();[m
+[32m+[m[32m        }[m
+[32m+[m
+         Usuario usuarioAntiguo = memoria.usuarios.get(idUsuario);[m
+ [m
+         if (datosNuevos.email() != null && !datosNuevos.email().equals(usuarioAntiguo.email())) {[m
+[36m@@ -192,6 +200,8 @@[m [mpublic class PistaController {[m
+         memoria.usuarios.put(idUsuario, usuarioActualizado);[m
+         logger.info("Usuario modificado OK: id={}", idUsuario);[m
+         return ResponseEntity.ok(usuarioActualizado);[m
+[32m+[m
+[32m+[m
+     }[m
+ [m
+     @DeleteMapping("/reservations/{reservationId}")[m
+[36m@@ -466,6 +476,7 @@[m [mpublic class PistaController {[m
+             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no existe");[m
+         }[m
+ [m
+[32m+[m
+         List<Reserva> listaReservas = memoria.reservas.values().stream()[m
+                 .filter(r -> r.idUsuario().equals(userId)) // Filtro principal: Solo las mías[m
+                 // Filtro de fecha 'from' (si existe)[m
+[36m@@ -477,6 +488,14 @@[m [mpublic class PistaController {[m
+                 .toList();[m
+ [m
+         return ResponseEntity.ok(listaReservas); // 200 OK[m
+[32m+[m
+[32m+[m[32m        Usuario usuarioBaneado = memoria.usuarios.get(userId);[m
+[32m+[m[32m        Usuario solicitante = memoria.usuarios.get(userId);[m
+[32m+[m[32m        boolean esAdmin = solicitante.rol().nombreRol() == NombreRol.ADMIN;[m
+[32m+[m
+[32m+[m[32m        if (usuarioBaneado == "True" && !esAdmin) {[m
+[32m+[m[32m            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();[m
+[32m+[m[32m        }[m
+     }[m
+ [m
+ [m
+[1mdiff --git a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/MeResponse.java b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/MeResponse.java[m
+[1mindex d6cb54f..fe82e76 100644[m
+[1m--- a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/MeResponse.java[m
+[1m+++ b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/MeResponse.java[m
+[36m@@ -6,5 +6,5 @@[m [mpublic record MeResponse([m
+         String apellidos,[m
+         String email,[m
+         String telefono,[m
+[31m-        String rol[m
+[31m-) {}[m
+[32m+[m[32m        String rol,[m
+[32m+[m[32m        Boolean baneado) {}[m
+[1mdiff --git a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/Usuario.java b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/Usuario.java[m
+[1mindex 5b042ec..dca3471 100644[m
+[1m--- a/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/Usuario.java[m
+[1m+++ b/src/main/java/edu/comillas/icai/gitt/pat/spring/padelapp/modelo/Usuario.java[m
+[36m@@ -12,6 +12,7 @@[m [mpublic record Usuario([m
+         LocalDateTime fechaAlta, //Utilizamos localdatetime para saber dia-hora-mins-seg[m
+         String telefono,[m
+         Rol rol,[m
+[31m-        String email[m
+[32m+[m[32m        String email,[m
+[32m+[m[32m        Boolean baneado[m
+ ) {[m
+ }[m
