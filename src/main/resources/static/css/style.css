@@ -400,3 +400,86 @@ header h2 {
     margin-bottom: 0;
     font-size: 16px;
 }
+
+/* Estilos específicos para el formulario de reserva */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    background: white;
+}
+
+.custom-input:focus {
+    border-color: #5c7cfa;
+    outline: none;
+}
+
+/* Estilo para los mensajes de éxito o error */
+#message {
+    margin-top: 1.5rem;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+label {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+    font-size: 20px;
+    color: #222;
+}
+
+#reservation-form {
+    background: transparent; 
+    box-shadow: none;        
+    padding: 1rem 0;
+    max-width: 500px;
+}
+
+/* Pequeña vista previa de la pista dentro del form */
+.court-thumb {
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid white;
+    display: none; /* Se activa con JS */
+}
+
+/* El cuadro de precio */
+
+.price-badge {
+    background-color: #222;
+    color: #5c7cfa; /* El azul que usas en el hero */
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    text-align: center;
+    margin: 1.5rem 0;
+    letter-spacing: 1px;
+    width: 100%;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(246, 241, 220, 0.9); /* Beige de tus tarjetas */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}

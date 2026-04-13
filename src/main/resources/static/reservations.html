@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Pista - Club de Tenis</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-titles">
+            <h1>CLUB DE TENIS</h1>
+            <h2>RESERVA TU PISTA</h2>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html">Inicio</a>
+            <a href="courts.html">Pistas</a>
+            <a href="my-reservations.html">Mis Reservas</a>
+        </nav>
+    </header>
+
+
+
+    <main>
+        <section class="hero-home">
+            <p class="hero-kicker">PROCESO DE RESERVA</p>
+            <h2 class="hero-title">NUEVA <span>RESERVA</span></h2>
+
+            <form id="reservation-form">
+                <div class="form-group">
+                    <label>SELECCIONA PISTA</label>
+                    <select id="court-select" class="custom-input">
+                        <option value="Central">Pista Central</option>
+                        <option value="Lateral">Pista Lateral</option>
+                        <option value="Exterior">Pista Exterior</option>
+                        <option value="Cesped">Pista de Césped</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>FECHA Y HORA</label>
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="date" id="date" class="custom-input">
+                        <input type="time" id="time" class="custom-input">
+                    </div>
+                </div>
+
+                <div class="price-badge">
+                    TOTAL A PAGAR: <span id="total-price">$0</span>
+                </div>
+                <button type="submit" class="btn-home">CONFIRMAR Y PAGAR</button>
+                <div class="form-group">
+                    <label>DURACIÓN</label>
+                    <select id="duration" class="custom-input">
+                        <option value="60">60 Minutos (1h)</option>
+                        <option value="90">90 Minutos (1.5h)</option>
+                        <option value="120">120 Minutos (2h)</option>
+                    </select>
+                </div>
+            </form>
+        </section>
+
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Club de Tenis Profesional</p>
+    </footer>
+
+    <script src="reservations.js"></script>
+</body>
+
+</html>
