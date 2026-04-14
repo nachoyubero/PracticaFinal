@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reservas - ForPadelist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<header>
+    <div class="header-titles">
+        <h1>FORPADELIST</h1>
+        <h2>Gestiona tus partidos y reservas de pádel</h2>
+    </div>
+
+    <nav class="main-nav">
+        <a href="index.html">Inicio</a>
+        <a href="courts.html">Pistas</a>
+        <a href="availability.html">Disponibilidad</a>
+        <a href="my-reservations.html">Mis reservas</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="register.html">Registro</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero-home" style="padding: 2rem; margin-bottom: 2rem;">
+        <h2 class="hero-title" style="font-size: 48px; margin: 0;">MIS <span>RESERVAS</span></h2>
+        <p class="hero-text" style="margin-top: 1rem;">
+            Consulta, modifica o cancela tus próximos partidos.
+        </p>
+    </section>
+
+    <section id="courtsList">
+
+        <div class="courtcard">
+            <h3>Reserva #001</h3>
+            <p><strong>Pista:</strong> Central</p>
+            <p><strong>Fecha:</strong> 25/11/2024</p>
+            <p><strong>Hora:</strong> 18:30 (90 min)</p>
+            <p><strong>Estado:</strong> Confirmada</p>
+
+            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                <button class="btn-reservar">Modificar</button>
+                <button class="btn-reservar" style="background-color: #ff6b6b; color: white;">Cancelar</button>
+            </div>
+        </div>
+
+        <div class="courtcard">
+            <h3>Reserva #002</h3>
+            <p><strong>Pista:</strong> Césped</p>
+            <p><strong>Fecha:</strong> 28/11/2024</p>
+            <p><strong>Hora:</strong> 10:00 (120 min)</p>
+            <p><strong>Estado:</strong> Confirmada</p>
+
+            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                <button class="btn-reservar">Modificar</button>
+                <button class="btn-reservar" style="background-color: #ff6b6b; color: white;">Cancelar</button>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2024 ForPadelist. Todos los derechos reservados.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidad - ForPadelist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<header>
+    <div class="header-titles">
+        <h1>FORPADELIST</h1>
+        <h2>Encuentra el hueco perfecto para tu próximo partido</h2>
+    </div>
+
+    <nav class="main-nav">
+        <a href="index.html">Inicio</a>
+        <a href="courts.html">Pistas</a>
+        <a href="availability.html">Disponibilidad</a>
+        <a href="my-reservations.html">Mis reservas</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="register.html">Registro</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero-home" style="padding: 2rem; margin-bottom: 2rem;">
+        <h2 class="hero-title" style="font-size: 48px; margin: 0;">CONSULTA <span>DISPONIBILIDAD</span></h2>
+
+        <form id="searchAvailabilityForm" style="flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: flex-end; max-width: 800px; margin-top: 1.5rem; background: transparent; box-shadow: none; padding: 0;">
+
+            <div style="display: flex; flex-direction: column; text-align: left;">
+                <label for="fechaBusqueda">Fecha del partido:</label>
+                <input type="date" id="fechaBusqueda" required style="width: 200px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; text-align: left;">
+                <label for="pistaBusqueda">Pista (Opcional):</label>
+                <select id="pistaBusqueda" style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; width: 200px; outline: none; background: white;">
+                    <option value="">Todas las pistas</option>
+                    <option value="1">Pista 1 - Central</option>
+                    <option value="2">Pista 2 - Lateral</option>
+                    <option value="3">Pista 3 - Exterior</option>
+                    <option value="4">Pista 4 - Césped</option>
+                </select>
+            </div>
+
+            <button type="submit" style="margin-top: 0; padding: 0.8rem 1.5rem;">Buscar Huecos</button>
+        </form>
+    </section>
+
+    <section id="courtsList">
+        <p id="mensaje-carga" style="color: white; font-size: 1.2rem; background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 8px;">
+            Selecciona una fecha y dale a buscar para ver la disponibilidad.
+        </p>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2024 ForPadelist. Todos los derechos reservados.</p>
+</footer>
+</body>
+</html>
