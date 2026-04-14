@@ -15,7 +15,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             margin-bottom: 1rem;
             overflow: hidden;
         }
@@ -41,25 +41,31 @@
         }
 
         details.court-accordion .accordion-content {
-            padding: 1.5rem;
+            padding: 1rem;
             border-top: 2px solid #eee;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
         .timetable {
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .timetable th, .timetable td {
-            padding: 0.8rem;
-            border-bottom: 1px solid #ddd;
         }
 
         .timetable th {
+            position: sticky;
+            top: 0;
             background-color: #222;
             color: white;
+            padding: 0.8rem;
+            z-index: 1;
+        }
+
+        .timetable td {
+            padding: 0.6rem;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
         }
 
         .status-libre {
@@ -67,7 +73,9 @@
             background-color: #d4edda;
             font-weight: bold;
             border-radius: 4px;
-            padding: 4px 8px;
+            padding: 2px 8px;
+            display: inline-block;
+            width: 80px;
         }
 
         .status-ocupado {
@@ -75,7 +83,23 @@
             background-color: #f8d7da;
             font-weight: bold;
             border-radius: 4px;
-            padding: 4px 8px;
+            padding: 2px 8px;
+            display: inline-block;
+            width: 80px;
+        }
+
+        .btn-table-reservar {
+            text-decoration: none;
+            background-color: lightgray;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-table-reservar:hover {
+            background-color: lightblue;
         }
     </style>
 </head>
@@ -114,179 +138,148 @@
     <section id="courtsList" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
 
         <details class="court-accordion" open>
-            <summary>
-                <span>🎾 Pista Central</span>
-                <span>▼</span>
-            </summary>
+            <summary><span>🎾 Pista Central</span><span>▼</span></summary>
             <div class="accordion-content">
-                <h3 style="margin-top: 0; text-align: center;">Horario Completo</h3>
                 <table class="timetable">
-                    <thead>
-                    <tr>
-                        <th>Tramo Horario</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Tramo</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
-                    <tr>
-                        <td>09:00 - 10:30</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>10:30 - 12:00</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>12:00 - 13:30</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>13:30 - 15:00</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>15:00 - 16:30</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>16:30 - 18:00</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>18:00 - 19:30</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>19:30 - 20:30</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>20:30 - 22:00</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
+                    <tr><td>09:00 - 09:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>09:30 - 10:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>10:00 - 10:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>10:30 - 11:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>11:00 - 11:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>11:30 - 12:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>12:00 - 12:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>12:30 - 13:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>13:00 - 13:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>13:30 - 14:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>14:00 - 14:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>14:30 - 15:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>15:00 - 15:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>15:30 - 16:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>16:00 - 16:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>16:30 - 17:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>17:00 - 17:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>17:30 - 18:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>18:00 - 18:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>18:30 - 19:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>19:00 - 19:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>19:30 - 20:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>20:00 - 20:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>20:30 - 21:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:00 - 21:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>21:30 - 22:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
                     </tbody>
                 </table>
             </div>
         </details>
 
         <details class="court-accordion">
-            <summary>
-                <span>🎾 Pista Lateral</span>
-                <span>▼</span>
-            </summary>
+            <summary><span>🎾 Pista Lateral</span><span>▼</span></summary>
             <div class="accordion-content">
-                <h3 style="margin-top: 0; text-align: center;">Horario Completo</h3>
                 <table class="timetable">
-                    <thead>
-                    <tr>
-                        <th>Tramo Horario</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Tramo</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
-                    <tr>
-                        <td>09:00 - 10:30</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>10:30 - 12:00</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>12:00 - 13:30</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>13:30 - 15:00</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>15:00 - 16:30</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>16:30 - 22:00</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">Mantenimiento</span></td>
-                    </tr>
+                    <tr><td>09:00 - 09:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>09:30 - 10:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>10:00 - 10:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>10:30 - 11:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>11:00 - 11:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>11:30 - 12:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>12:00 - 12:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>12:30 - 13:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>13:00 - 13:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>13:30 - 14:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>14:00 - 14:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>14:30 - 15:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>15:00 - 15:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>15:30 - 16:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>16:00 - 16:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>16:30 - 17:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>17:00 - 17:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>17:30 - 18:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>18:00 - 18:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>18:30 - 19:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>19:00 - 19:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>19:30 - 20:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>20:00 - 20:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>20:30 - 21:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:00 - 21:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:30 - 22:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
                     </tbody>
                 </table>
             </div>
         </details>
 
         <details class="court-accordion">
-            <summary>
-                <span>🎾 Pista Exterior</span>
-                <span>▼</span>
-            </summary>
+            <summary><span>🎾 Pista Exterior</span><span>▼</span></summary>
             <div class="accordion-content">
-                <h3 style="margin-top: 0; text-align: center;">Horario Completo</h3>
                 <table class="timetable">
-                    <thead>
-                    <tr>
-                        <th>Tramo Horario</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Tramo</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
-                    <tr>
-                        <td>09:00 - 14:00</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
-                    <tr>
-                        <td>14:00 - 18:00</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">No disponible</span></td>
-                    </tr>
-                    <tr>
-                        <td>18:00 - 22:00</td>
-                        <td><span class="status-libre">Libre</span></td>
-                        <td><a href="reservations.html" class="btn-reservar" style="text-decoration: none; font-size: 14px; padding: 4px 10px;">Reservar</a></td>
-                    </tr>
+                    <tr><td>09:00 - 09:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>09:30 - 10:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>10:00 - 10:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>10:30 - 11:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>11:00 - 11:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>11:30 - 12:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>12:00 - 12:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>12:30 - 13:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>13:00 - 13:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>13:30 - 14:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>14:00 - 14:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>14:30 - 15:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>15:00 - 15:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>15:30 - 16:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>16:00 - 16:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>16:30 - 17:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>17:00 - 17:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>17:30 - 18:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>18:00 - 18:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>18:30 - 19:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>19:00 - 19:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>19:30 - 20:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>20:00 - 20:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>20:30 - 21:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:00 - 21:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:30 - 22:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
                     </tbody>
                 </table>
             </div>
         </details>
 
         <details class="court-accordion">
-            <summary>
-                <span>🎾 Pista de Césped</span>
-                <span>▼</span>
-            </summary>
+            <summary><span>🎾 Pista de Césped</span><span>▼</span></summary>
             <div class="accordion-content">
-                <h3 style="margin-top: 0; text-align: center;">Horario Completo</h3>
                 <table class="timetable">
-                    <thead>
-                    <tr>
-                        <th>Tramo Horario</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Tramo</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
-                    <tr>
-                        <td>09:00 - 22:00</td>
-                        <td><span class="status-ocupado">Ocupado</span></td>
-                        <td><span style="color: #999;">Torneo en curso</span></td>
-                    </tr>
+                    <tr><td>09:00 - 09:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>09:30 - 10:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>10:00 - 10:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>10:30 - 11:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>11:00 - 11:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>11:30 - 12:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>12:00 - 12:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>12:30 - 13:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>13:00 - 13:30</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>13:30 - 14:00</td><td><span class="status-ocupado">Ocupado</span></td><td>-</td></tr>
+                    <tr><td>14:00 - 14:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>14:30 - 15:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>15:00 - 15:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>15:30 - 16:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>16:00 - 16:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>16:30 - 17:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>17:00 - 17:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>17:30 - 18:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>18:00 - 18:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>18:30 - 19:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>19:00 - 19:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>19:30 - 20:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>20:00 - 20:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>20:30 - 21:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:00 - 21:30</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
+                    <tr><td>21:30 - 22:00</td><td><span class="status-libre">Libre</span></td><td><a href="#" class="btn-table-reservar">Reservar</a></td></tr>
                     </tbody>
                 </table>
             </div>
