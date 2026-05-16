@@ -20,7 +20,7 @@
             <a href="index.html">Inicio</a>
             <a href="courts.html">Pistas</a>
             <a href="availability.html">Disponibilidad</a>
-            <a href="reservations.html">Mis reservas</a>
+            <a href="my-reservations.html">Mis reservas</a>
             <a href="login.html">Iniciar sesión</a>
             <a href="register.html">Registro</a>
         </nav>
@@ -28,7 +28,7 @@
 
     <main>
 
-        <form action="register.php" method="POST">
+        <form id="registerForm">
             <label for="nombre">Nombre de usuario:</label>
             <input type="text" id="nombre" name="nombre" required>
 
@@ -56,11 +56,9 @@
         <p>&copy; 2026 ForPadelist. Todos los derechos reservados.</p>
     </footer>
 
-
+    <script src="js/api.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/register.js"></script>
 </body>
-
-
-
-
-
 </html>

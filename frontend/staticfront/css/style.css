@@ -336,6 +336,7 @@ header h2 {
 }
 
 .btn-home {
+    width: 540px;
     background-color: #222;
     color: white;
     padding: 0.95rem 1.6rem;

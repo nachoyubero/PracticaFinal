@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservar Pista - Club de Tenis</title>
+    <title>Reservar Pista - ForPadelist</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -17,11 +17,12 @@
         <nav class="main-nav">
             <a href="index.html">Inicio</a>
             <a href="courts.html">Pistas</a>
+            <a href="availability.html">Disponibilidad</a>
             <a href="my-reservations.html">Mis Reservas</a>
+            <a href="login.html">Iniciar sesión</a>
+            <a href="register.html">Registro</a>
         </nav>
     </header>
-
-
 
     <main>
         <section class="hero-home">
@@ -32,24 +33,16 @@
                 <div class="form-group">
                     <label>SELECCIONA PISTA</label>
                     <select id="court-select" class="custom-input">
-                        <option value="Central">Pista Central</option>
-                        <option value="Lateral">Pista Lateral</option>
-                        <option value="Exterior">Pista Exterior</option>
-                        <option value="Cesped">Pista de Césped</option>
+                        <!-- las pistas se cargan vía JS -->
                     </select>
                 </div>
                 <div class="form-group">
                     <label>FECHA Y HORA</label>
                     <div style="display: flex; gap: 10px; width: 100%;">
-                        <input type="date" id="date" class="custom-input">
-                        <input type="time" id="time" class="custom-input">
+                        <input type="date" id="date" class="custom-input" required>
+                        <input type="time" id="time" class="custom-input" required>
                     </div>
                 </div>
-
-                <div class="price-badge">
-                    TOTAL A PAGAR: <span id="total-price">$0</span>
-                </div>
-                <button type="submit" class="btn-home">CONFIRMAR Y PAGAR</button>
                 <div class="form-group">
                     <label>DURACIÓN</label>
                     <select id="duration" class="custom-input">
@@ -58,17 +51,23 @@
                         <option value="120">120 Minutos (2h)</option>
                     </select>
                 </div>
+
+                <div class="price-badge">
+                    TOTAL A PAGAR: <span id="total-price">$0</span>
+                </div>
+                <button type="submit" class="btn-home">CONFIRMAR Y PAGAR</button>
             </form>
         </section>
-
-
     </main>
 
     <footer>
-        <p>&copy; 2026 Club de Tenis Profesional</p>
+        <p>&copy; 2026 ForPadelist</p>
     </footer>
 
-    <script src="reservations.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/reservations.js"></script>
 </body>
 
 </html>
