@@ -47,33 +47,7 @@ supervisar todas las reservas del sistema.
 
   ---
 
-## Estructura del proyecto
 
-PracticaFinal/
-├── src/
-│   ├── main/
-│   │   ├── java/.../padelapp/
-│   │   │   ├── controlador/       # AuthController, PistaController
-│   │   │   ├── modelo/            # Entidades JPA y DTOs
-│   │   │   ├── repositorio/       # Interfaces Spring Data JPA
-│   │   │   ├── servicios/         # Lógica de negocio
-│   │   │   ├── seguridad/         # Configuración de seguridad
-│   │   │   ├── errores/           # Manejo global de errores
-│   │   │   ├── clases/            # Enums (Estado, FranjaHoraria, NombreRol)
-│   │   │   └── DataSeeder.java    # Inicialización de datos
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       └── static/            # Frontend servido por Spring Boot
-│   └── test/
-│       └── java/.../padelapp/     # Tests de integración y unitarios
-├── frontend/
-│   └── staticfront/               # Fuentes del frontend
-│       ├── js/                    # Módulos JavaScript
-│       ├── css/
-│       └── img/
-└── pom.xml
-
-  ---
 
 ## API — Endpoints principales
 
