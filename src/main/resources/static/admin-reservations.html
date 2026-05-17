@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservas admin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="hero">
+    <h1>FORPADELIST</h1>
+    <p>Encuentra las mejores pistas para jugar al pádel</p>
+
+    <nav class="main-nav">
+        <a href="index.html">Inicio</a>
+        <a href="courts.html">Pistas</a>
+        <a href="availability.html">Disponibilidad</a>
+        <a href="reservations.html">Reservar</a>
+        <a href="my-reservations.html">Mis reservas</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="register.html">Registro</a>
+    </nav>
+</header>
+
+<main class="page-content">
+    <h1>Reservas de todos los usuarios</h1>
+
+    <section class="section-block">
+        <h2>Filtrar reservas</h2>
+
+        <form id="filtrosReservasAdmin" class="form-card">
+            <input type="date" name="date">
+            <input type="number" name="courtId" placeholder="ID pista">
+            <input type="number" name="userId" placeholder="ID usuario">
+            <button type="submit" class="btn-reservar">Filtrar</button>
+            <button type="button" id="limpiarFiltros" class="btn-reservar">Limpiar</button>
+        </form>
+    </section>
+
+    <section class="section-block">
+        <h2>Listado de reservas</h2>
+        <div id="adminReservationsList" class="courts-grid"></div>
+    </section>
+</main>
+
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/admin-reservations.js"></script>
+
+</body>
+</html>

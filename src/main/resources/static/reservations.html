@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Pista - ForPadelist</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-titles">
+            <h1>ForPadelist</h1>
+            <h2>RESERVA TU PISTA</h2>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html">Inicio</a>
+            <a href="courts.html">Pistas</a>
+            <a href="availability.html">Disponibilidad</a>
+            <a href="my-reservations.html">Mis Reservas</a>
+            <a href="login.html">Iniciar sesión</a>
+            <a href="register.html">Registro</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-home">
+            <p class="hero-kicker">PROCESO DE RESERVA</p>
+            <h2 class="hero-title">NUEVA <span>RESERVA</span></h2>
+
+            <form id="reservation-form">
+                <div class="form-group">
+                    <label>SELECCIONA PISTA</label>
+                    <select id="court-select" class="custom-input">
+                        <!-- las pistas se cargan vía JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>FECHA Y HORA</label>
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <input type="date" id="date" class="custom-input" required>
+                        <input type="time" id="time" class="custom-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>DURACIÓN</label>
+                    <select id="duration" class="custom-input">
+                        <option value="60">60 Minutos (1h)</option>
+                        <option value="90">90 Minutos (1.5h)</option>
+                        <option value="120">120 Minutos (2h)</option>
+                    </select>
+                </div>
+
+                <div class="price-badge">
+                    TOTAL A PAGAR: <span id="total-price">$0</span>
+                </div>
+                <button type="submit" class="btn-home">CONFIRMAR Y PAGAR</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 ForPadelist</p>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/reservations.js"></script>
+</body>
+
+</html>

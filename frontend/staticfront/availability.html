@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidad - ForPadelist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        details.court-accordion {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        details.court-accordion summary::-webkit-details-marker { display: none; }
+
+        details.court-accordion summary {
+            list-style: none;
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(246, 241, 220, 0.85);
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        details.court-accordion summary:hover { background-color: lightblue; }
+
+        details.court-accordion .accordion-content {
+            padding: 1rem;
+            border-top: 2px solid #eee;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .timetable { width: 100%; border-collapse: collapse; text-align: center; }
+
+        .timetable th {
+            position: sticky;
+            top: 0;
+            background-color: #222;
+            color: white;
+            padding: 0.8rem;
+            z-index: 1;
+        }
+
+        .timetable td {
+            padding: 0.6rem;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .status-libre {
+            color: #155724;
+            background-color: #d4edda;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 2px 8px;
+            display: inline-block;
+            width: 80px;
+        }
+
+        .status-ocupado {
+            color: #721c24;
+            background-color: #f8d7da;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 2px 8px;
+            display: inline-block;
+            width: 80px;
+        }
+
+        .btn-table-reservar {
+            text-decoration: none;
+            background-color: lightgray;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-table-reservar:hover { background-color: lightblue; }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="header-titles">
+        <h1>FORPADELIST</h1>
+        <h2>Encuentra el hueco perfecto para tu próximo partido</h2>
+    </div>
+
+    <nav class="main-nav">
+        <a href="index.html">Inicio</a>
+        <a href="courts.html">Pistas</a>
+        <a href="availability.html">Disponibilidad</a>
+        <a href="my-reservations.html">Mis reservas</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="register.html">Registro</a>
+    </nav>
+</header>
+
+<main style="align-items: center;">
+
+    <section class="hero-home" style="padding: 2rem; margin-bottom: 2rem; width: 100%; max-width: 600px;">
+        <h2 class="hero-title" style="font-size: 48px; margin: 0;">CONSULTA <span>DISPONIBILIDAD</span></h2>
+
+        <form id="searchAvailabilityForm" style="flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: flex-end; margin-top: 1.5rem; background: transparent; box-shadow: none; padding: 0;">
+            <div style="display: flex; flex-direction: column; text-align: left;">
+                <label for="fechaBusqueda">Elige el día que quieres jugar:</label>
+                <input type="date" id="fechaBusqueda" required style="width: 250px;">
+            </div>
+            <button type="submit" style="margin-top: 0; padding: 0.8rem 1.5rem; width: 120px;">Buscar</button>
+        </form>
+    </section>
+
+    <section id="courtsList" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <!-- Las tablas de disponibilidad las pinta availability.js -->
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2026 ForPadelist. Todos los derechos reservados.</p>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/session.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/availability.js"></script>
+</body>
+</html>

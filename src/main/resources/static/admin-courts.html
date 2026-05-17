@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionar pistas</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="header-titles">
+        <h1>ForPadelist</h1>
+        <h2>Reserva tu pista de pádel de forma rápida y sencilla</h2>
+    </div>
+    <nav class="main-nav">
+        <a href="index.html">Inicio</a>
+        <a href="courts.html">Pistas</a>
+        <a href="availability.html">Disponibilidad</a>
+        <a href="my-reservations.html">Mis reservas</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="register.html">Registro</a>
+    </nav>
+</header>
+
+<main>
+    <h1>Gestión de pistas</h1>
+
+    <section>
+        <h2>Crear nueva pista</h2>
+
+        <form id="crearPistaForm">
+            <input name="nombre" placeholder="Nombre de la pista" required>
+            <input name="ubicacion" placeholder="Ubicación" required>
+            <input name="precioHora" type="number" step="0.01" placeholder="Precio por hora" required>
+            <button type="submit">Crear pista</button>
+        </form>
+
+        <p id="crearPistaMsg"></p>
+    </section>
+
+    <section>
+        <h2>Pistas existentes</h2>
+        <div id="adminCourtsList"></div>
+    </section>
+</main>
+
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/admin-courts.js"></script>
+
+</body>
+</html>

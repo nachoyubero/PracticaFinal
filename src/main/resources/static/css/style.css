@@ -1,0 +1,485 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../img/fondobody.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.8rem 2rem 1.2rem 2rem;
+    background-color: rgba(0, 0, 0, 0.28);
+    color: white;
+    gap: 0.8rem;
+}
+
+.header-titles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 92px;
+    letter-spacing: 2px;
+    margin: 0;
+    color: white;
+    line-height: 1;
+}
+
+header h2 {
+    font-size: 24px;
+    font-weight: 400;
+    margin: 0;
+    color: white;
+    text-align: center;
+}
+
+.main-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.2rem;
+    padding: 0.8rem 0 0.2rem 0;
+    background: transparent;
+}
+
+.main-nav a {
+    position: relative;
+    color: white;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.main-nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 0;
+    height: 3px;
+    background-color: white;
+    transition: width 0.25s ease;
+}
+
+.main-nav a:hover::after {
+    width: 100%;
+}
+
+.main-nav a:hover {
+    color: #e0e0e0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    padding: 3rem 2rem;
+    min-height: calc(100vh - 120px);
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.92);  
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+input {
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    border-color: darkgray;
+}
+
+button {
+    background-color: lightgray;
+    color: #333;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 0.5rem;
+}
+
+button:hover {
+    background-color: lightblue;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 18px;
+}
+
+
+p a {
+    color: whitesmoke;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+
+.courtcard{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    background-color: rgba(255, 255, 255, 0.92);  
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.Exterior{
+    background-image: url('../img/PistaExterior.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.Central{
+    background-image: url('../img/PistaCentral.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.Lateral{
+    background-image: url('../img/PistaLateral.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.Cesped{
+    background-image: url('../img/PistaCesped.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.courtcard:hover{
+    background-color: lightblue;
+    font-weight: bold;
+    transform: translateY(2px);
+}
+
+
+
+#courtsList {
+    display: flex;
+    flex-direction: row;        
+    flex-wrap: wrap;            
+    gap: 2rem;                  
+    justify-content: center;
+    padding: 1rem;
+}
+
+.btn-reservar {
+    background-color: rgba(255, 248, 220, 0.85);
+    color: #333;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+}
+
+.btn-reservar:hover {
+    background-color: lightblue;
+    font-weight: bold;
+}
+
+
+.courtcard h3 {
+    background-color: rgba(246, 241, 220, 0.85);  
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    width: 100%;
+    text-align: center;
+}
+
+.courtcard p {
+    background-color: rgba(246, 241, 220, 0.85);
+    padding: 0.3rem 1rem;
+    border-radius: 6px;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-image: url('../img/fondobody.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.8rem 2rem 1.2rem 2rem;
+    background-color: rgba(0, 0, 0, 0.28);
+    color: white;
+    gap: 0.8rem;
+}
+
+header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 92px;
+    letter-spacing: 2px;
+    margin: 0;
+    color: white;
+    line-height: 1;
+}
+
+header h2 {
+    font-size: 24px;
+    font-weight: 400;
+    margin: 0;
+    color: white;
+}
+
+/* HERO PRINCIPAL */
+.hero-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 3rem 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.22);
+    width: 100%;
+    max-width: 950px;
+    backdrop-filter: blur(3px);
+}
+
+.hero-kicker {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.hero-title {
+    margin: 0.8rem 0 1rem 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 0.95;
+    letter-spacing: 2px;
+    color: #222;
+}
+
+.hero-title span {
+    color: #5c7cfa;
+}
+
+.hero-text {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 400;
+    color: #444;
+    max-width: 720px;
+}
+
+/* BOTONES */
+.home-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-home {
+    background-color: #222;
+    color: white;
+    padding: 0.95rem 1.6rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-home:hover {
+    background-color: #5c7cfa;
+    transform: translateY(-2px);
+}
+
+.btn-home-secondary {
+    background-color: transparent;
+    color: #222;
+    border: 2px solid #222;
+}
+
+.btn-home-secondary:hover {
+    background-color: #222;
+    color: white;
+}
+
+/* TARJETAS INFERIORES */
+.home-features {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem 1.5rem;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 24px;
+    font-weight: 700;
+    color: #222;
+}
+
+.feature-card p {
+    color: #444;
+    margin-bottom: 0;
+    font-size: 16px;
+}
+
+/* Estilos específicos para el formulario de reserva */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    background: white;
+}
+
+.custom-input:focus {
+    border-color: #5c7cfa;
+    outline: none;
+}
+
+/* Estilo para los mensajes de éxito o error */
+#message {
+    margin-top: 1.5rem;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+label {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+    font-size: 20px;
+    color: #222;
+}
+
+#reservation-form {
+    background: transparent; 
+    box-shadow: none;        
+    padding: 1rem 0;
+    max-width: 500px;
+}
+
+/* Pequeña vista previa de la pista dentro del form */
+.court-thumb {
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid white;
+    display: none; /* Se activa con JS */
+}
+
+/* El cuadro de precio */
+
+.price-badge {
+    background-color: #222;
+    color: #5c7cfa; /* El azul que usas en el hero */
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    text-align: center;
+    margin: 1.5rem 0;
+    letter-spacing: 1px;
+    width: 100%;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(246, 241, 220, 0.9); /* Beige de tus tarjetas */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
