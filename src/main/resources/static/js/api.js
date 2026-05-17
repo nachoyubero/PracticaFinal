@@ -6,9 +6,9 @@
 //   - Lanzar un error legible si el backend devuelve != 2xx.
 // ============================================================
 
-// Si en el futuro montas el frontend en otro host (por ejemplo,
-// con Live Server en :5500 y el backend en :8080) sólo tienes
-// que cambiar esta línea a "http://localhost:8080".
+// Si en el futuro se monta el frontend en otro host (por ejemplo,
+// backend en :8080) sólo hay que cambiar
+// esta línea a "http://localhost:8080".
 const API_BASE = "/pistaPadel";
 
 /**
