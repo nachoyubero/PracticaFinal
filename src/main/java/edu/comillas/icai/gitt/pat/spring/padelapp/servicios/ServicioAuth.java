@@ -52,6 +52,10 @@ public class ServicioAuth {
         Usuario usuario = repoUsuario.findByEmail(emailNorm)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas"));
 
+        if (usuario.getActivo() != null && !usuario.getActivo()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuario desactivado");
+        }
+
         if (!encoder.matches(req.password(), usuario.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
         }
