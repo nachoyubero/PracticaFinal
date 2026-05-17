@@ -54,6 +54,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 btn.style.color = "white";
                 btn.textContent = "Cancelar";
 
+                const btnEditar = document.createElement("button");
+                btnEditar.className = "btn-reservar";
+                btnEditar.textContent = "Modificar";
+
+                btnEditar.addEventListener("click", () => {
+                    window.location.href = `edit-reservations.html?id=${r.idReserva}`;
+                });
+
+                cont.appendChild(btnEditar);
+
                 btn.addEventListener("click", async () => {
                     if (!confirm(`¿Cancelar la reserva #${r.idReserva}?`)) return;
                     btn.disabled = true;

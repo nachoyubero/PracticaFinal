@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar reserva</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="hero">
+    <h1>FORPADELIST</h1>
+    <p>Encuentra las mejores pistas para jugar al pádel</p>
+
+    <nav class="main-nav">
+        <a href="index.html">Inicio</a>
+        <a href="courts.html">Pistas</a>
+        <a href="availability.html">Disponibilidad</a>
+        <a href="reservations.html">Reservar</a>
+        <a href="my-reservations.html">Mis reservas</a>
+        <a href="login.html">Iniciar sesión</a>
+        <a href="register.html">Registro</a>
+    </nav>
+</header>
+
+<main class="page-content">
+    <h1>Modificar reserva</h1>
+
+    <section class="section-block">
+        <form id="editReservationForm" class="form-card">
+            <label for="date">Nueva fecha</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Nueva hora</label>
+            <input type="time" id="time" name="time" required>
+
+            <label for="duration">Duración</label>
+            <select id="duration" name="duration" required>
+                <option value="30">30 minutos</option>
+                <option value="60">1 hora</option>
+                <option value="90">1 hora y media</option>
+                <option value="120">2 horas</option>
+            </select>
+
+            <button type="submit" class="btn-reservar">Guardar cambios</button>
+            <a href="my-reservations.html" class="btn-reservar">Volver</a>
+        </form>
+
+        <p id="editReservationMsg"></p>
+    </section>
+</main>
+
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/edit-reservations.js"></script>
+
+</body>
+</html>
