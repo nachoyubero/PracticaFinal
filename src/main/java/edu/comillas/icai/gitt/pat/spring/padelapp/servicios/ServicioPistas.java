@@ -115,26 +115,46 @@ public class ServicioPistas {
 
     // Modificar Reserva
     public Reserva modificarReserva(Integer reservationId, Reserva nuevosDatos, Integer userId) {
-        Reserva existente = obtenerReserva(reservationId, userId); // Ya comprueba si existe y si tiene permiso
+        Reserva existente = obtenerReserva(reservationId, userId);
 
-        LocalDate nuevaFecha = nuevosDatos.getFechaReserva() != null ? nuevosDatos.getFechaReserva() : existente.getFechaReserva();
-        LocalTime nuevaHora = nuevosDatos.getHoraInicio() != null ? nuevosDatos.getHoraInicio() : existente.getHoraInicio();
-        Integer nuevaDuracion = nuevosDatos.getDuracionMinutos() != null ? nuevosDatos.getDuracionMinutos() : existente.getDuracionMinutos();
+        if (existente.getEstado() == Estado.CANCELADA) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "No se puede modificar una reserva cancelada");
+        }
 
-        // Comprobar reservas, evitamos sobreescritura con este método
-        if (nuevosDatos.getFechaReserva() != null || nuevosDatos.getHoraInicio() != null) {
-            LocalTime finNuevo = nuevaHora.plusMinutes(nuevaDuracion);
-            boolean pistaOcupada = repoReserva.findByPistaAndFechaReserva(existente.getPista(), nuevaFecha).stream()
-                    .filter(r -> !r.getIdReserva().equals(reservationId)) // Excluir la propia reserva
-                    .anyMatch(r -> nuevaHora.isBefore(r.getHoraFin()) && finNuevo.isAfter(r.getHoraInicio()));
+        LocalDate nuevaFecha = nuevosDatos.getFechaReserva() != null
+                ? nuevosDatos.getFechaReserva()
+                : existente.getFechaReserva();
 
-            if (pistaOcupada) throw new ResponseStatusException(HttpStatus.CONFLICT, "El nuevo horario ya está ocupado");
+        LocalTime nuevaHora = nuevosDatos.getHoraInicio() != null
+                ? nuevosDatos.getHoraInicio()
+                : existente.getHoraInicio();
+
+        Integer nuevaDuracion = nuevosDatos.getDuracionMinutos() != null
+                ? nuevosDatos.getDuracionMinutos()
+                : existente.getDuracionMinutos();
+
+        if (nuevaDuracion <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duración inválida");
+        }
+
+        if (LocalDateTime.of(nuevaFecha, nuevaHora).isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva fecha debe ser futura");
+        }
+
+        LocalTime nuevoFin = nuevaHora.plusMinutes(nuevaDuracion);
+
+        boolean pistaOcupada = repoReserva.findByPistaAndFechaReserva(existente.getPista(), nuevaFecha).stream()
+                .filter(r -> !r.getIdReserva().equals(reservationId))
+                .filter(r -> r.getEstado() != Estado.CANCELADA)
+                .anyMatch(r -> nuevaHora.isBefore(r.getHoraFin()) && nuevoFin.isAfter(r.getHoraInicio()));
+
+        if (pistaOcupada) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nuevo horario ya está ocupado");
         }
 
         existente.setFechaReserva(nuevaFecha);
         existente.setHoraInicio(nuevaHora);
         existente.setDuracionMinutos(nuevaDuracion);
-        if (nuevosDatos.getEstado() != null) existente.setEstado(nuevosDatos.getEstado());
 
         return repoReserva.save(existente);
     }
